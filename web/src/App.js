@@ -77,6 +77,7 @@ class App extends Component {
   };
 
   updatePlacesOfInterest = () => {
+    /*
     var testData = [
       { title: 'Tasmanian Museum and Art Gallery',                      lat: -42.88147, long: 147.33265, type: PLACE_TYPE.MUSEUM},
       { title: 'The Henry Jones Art Hotel',                             lat: -42.88117, long: 147.3354,  type: PLACE_TYPE.MUSEUM },
@@ -96,10 +97,9 @@ class App extends Component {
         ).addTo(map.map)
       )
     })
+    */
 
-    var urbanArt = new window.L.LayerGroup();
-    window.L.geoJson(Urban_Art).addTo(urbanArt); //{style: hydrosStyle}).addTo(hydro);
-
+    window.L.geoJSON(Urban_Art).addTo(map.map);
   };
 
   state = {
