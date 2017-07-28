@@ -44,6 +44,12 @@ class App extends Component {
             'Imagery © <a href="http://mapbox.com">Mapbox</a>',
         id: 'mapbox.streets'
     }).addTo(mymap)
+
+    // Test marker
+    var marker = window.L.marker([-42.87, 147.25]).addTo(mymap);
+
+    // Sets the map to the user's location
+    mymap.locate({setView: true, maxZoom: 16});
   };
 
   render() {
