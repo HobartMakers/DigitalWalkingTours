@@ -1,21 +1,46 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import logo from './logo.svg'
+import injectStyles from 'react-jss'
+import Button from './modules/Button'
+
+const styles = {
+  app: {
+    width: '100vw',
+    height: '100vh',
+    backgroundImage: `url(${require('./testMap.png')})`,
+    backgroundSize: 'cover',
+  },
+  buttonContainer: {
+    textAlign: 'center',
+    position: 'absolute',
+    bottom: 0,
+    height: 0,
+    width: '100vw',
+  },
+  buttonContainerInner: {
+    position: 'relative',
+  },
+  startTourButton: {
+    position: 'relative',
+    margin: '0 auto',
+    top: -(48 + 20),
+  },
+}
 
 class App extends Component {
   render() {
+    const { classes } = this.props
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+      <div className={classes.app}>
+        <div className={classes.buttonContainer}>
+          <div className={classes.buttonContainerInner}>
+            <Button className={classes.startTourButton} />
+          </div>
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
       </div>
     );
   }
 }
 
-export default App;
+export default injectStyles(styles)(App)
+
