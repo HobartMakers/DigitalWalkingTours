@@ -1,3 +1,4 @@
+import r360 from 'route360'
 
 function Map(){
   this.placesOfInterest_ = []
@@ -26,6 +27,25 @@ Map.prototype.onLocationError = function(error){
 
   // Fall back to a default location of the Old Mercury Building
   this.map.setView([-42.88234, 147.33047], 16)
+}
+
+Map.prototype.loadRouting = function(){
+
+  // initialise the base map
+  r360.basemap({ style: 'basic', apikey: '4UH6GBMYTDBEZSXZ6FUWL0E' }).addTo(map);
+
+  // create a target marker icon to be able to distingush source and targets
+  var redIcon = L.icon({
+    iconUrl: 'http://assets.route360.net/leaflet-extras/marker-icon-red.png',
+    shadowUrl: 'http://assets.route360.net/leaflet-extras/marker-shadow.png',
+    iconAnchor: [12, 45],
+    popupAnchor: [0, -35]
+  });
+
+  // create a source and a two target markers and add them to the map
+  var sourceMarker1 = L.marker(latlons.src1, { draggable : true }).addTo(map);
+  var targetMarker1 = L.marker(latlons.trg1, { icon: redIcon, draggable : true }).addTo(map);
+  var targetMarker2 = L.marker(latlons.trg2, { icon: redIcon, draggable : true }).addTo(map);
 }
 
 
