@@ -98,7 +98,6 @@ class App extends Component {
       )
     })
     */
-
     window.L.geoJSON(Urban_Art).addTo(map.map);
   };
 
