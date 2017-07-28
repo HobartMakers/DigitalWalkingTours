@@ -4,10 +4,16 @@ import injectStyles from 'react-jss'
 import Button from './modules/Button'
 import Map from './map/Map'
 import PLACE_TYPE from './map/PLACE_TYPE'
+import SideMenu from './modules/SideMenu'
+import FloatingButton from './modules/FloatingButton'
 
 const map = new Map
 
 const styles = {
+  '@global body': {
+    WebkitFontSmoothing: 'antialiased',
+    MozOsxFontSmoothing: 'grayscale',
+  },
   app: {
     width: '100vw',
     height: '100vh',
@@ -33,6 +39,12 @@ const styles = {
   mapContainer: {
     width: '100vw',
     height: '100vh',
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 30,
+    left: 60,
+    zIndex: 401,
   },
 }
 
@@ -63,32 +75,56 @@ class App extends Component {
 
   updatePlacesOfInterest = () => {
     var testData = [
-      { name: 'Tasmanian Museum and Art Gallery',                      lat: -42.88147, long: 147.33265, type: PLACE_TYPE.MUSEUM},
-      { name: 'The Henry Jones Art Hotel',                             lat: -42.88117, long: 147.3354,  type: PLACE_TYPE.MUSEUM },
-      { name: 'University of Tasmania, Tasmanian College of the Arts', lat: -42.88157, long: 147.33666, type: PLACE_TYPE.ART },
-      { name: 'Town Hall',                                             lat: -42.88254, long: 147.33106, type: PLACE_TYPE.HERITAGE},
-      { name: 'Mawson\'s Huts Replica Museum',                         lat: -42.88309, long: 147.33227, type: PLACE_TYPE.MUSEUM },
-      { name: 'St David\'s Cathedral',                                 lat: -42.88353, long: 147.32843, type: PLACE_TYPE.HERITAGE },
-      { name: 'Treasury Building',                                     lat: -42.88389, long: 147.32927, type: PLACE_TYPE.HERITAGE },
+      { title: 'Tasmanian Museum and Art Gallery',                      lat: -42.88147, long: 147.33265, type: PLACE_TYPE.MUSEUM},
+      { title: 'The Henry Jones Art Hotel',                             lat: -42.88117, long: 147.3354,  type: PLACE_TYPE.MUSEUM },
+      { title: 'University of Tasmania, Tasmanian College of the Arts', lat: -42.88157, long: 147.33666, type: PLACE_TYPE.ART },
+      { title: 'Town Hall',                                             lat: -42.88254, long: 147.33106, type: PLACE_TYPE.HERITAGE},
+      { title: 'Mawson\'s Huts Replica Museum',                         lat: -42.88309, long: 147.33227, type: PLACE_TYPE.MUSEUM },
+      { title: 'St David\'s Cathedral',                                 lat: -42.88353, long: 147.32843, type: PLACE_TYPE.HERITAGE },
+      { title: 'Treasury Building',                                     lat: -42.88389, long: 147.32927, type: PLACE_TYPE.HERITAGE },
     ]
     Promise.resolve(testData)
     .then(placesOfInterest => {
       placesOfInterest.forEach(p => 
-        window.L.marker([p.lat, p.long]).addTo(map.map)
+        window.L.marker(
+          [p.lat, p.long],
+          { title: p.title, },
+        ).addTo(map.map)
       )
     })
   };
 
+  state = {
+    sideMenuOpen: false,
+  };
+
+  closeSideMenu = () => this.setState({ sideMenuOpen: false });
+
+  toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
+
   render() {
     const { classes } = this.props
+    const { sideMenuOpen } = this.state
     return (
       <div className={classes.app}>
-        <div className={classes.mapContainer} ref={el => this.mapEle_ = el} />
-        <div className={classes.buttonContainer}>
-          <div className={classes.buttonContainerInner}>
-            <Button className={classes.startTourButton} />
+        <div onClick={this.closeSideMenu}>
+          <div 
+            className={classes.mapContainer} 
+            ref={el => this.mapEle_ = el} 
+          />
+          <div className={classes.buttonContainer}>
+            <div className={classes.buttonContainerInner}>
+              <Button className={classes.startTourButton}>Start Tour</Button>
+            </div>
           </div>
         </div>
+        <FloatingButton className={classes.menuButton} onClick={this.toggleSideMenu}>
+          <svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </FloatingButton>
+        <SideMenu open={sideMenuOpen} />
       </div>
     );
   }

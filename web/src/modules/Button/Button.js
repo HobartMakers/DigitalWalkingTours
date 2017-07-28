@@ -20,9 +20,9 @@ const styles = {
 
 class Button extends Component {
   render = () => {
-    const { classes, className } = this.props
+    const { classes, className, children, } = this.props
     return <button className={classNames(classes.button, className)}>
-      Start Tour
+      {children}
     </button>
   }
 }
