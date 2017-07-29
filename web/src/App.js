@@ -183,7 +183,12 @@ class App extends Component {
       loading: true,
     })
 
-    map.generatePath(20);
+    map.generatePath(20)
+    .then(() => {
+      this.setState({
+        loading: false,
+      })
+    })
 
     /*
 

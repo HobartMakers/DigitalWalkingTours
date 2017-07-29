@@ -39,19 +39,19 @@ IconFactory.prototype.createSvgIcon = function(type, iconOptions = {}){
     case PLACE_TYPE.GALLERY: var Icon = ArtGalleryIcon; var color = '734a08'; break;
     case PLACE_TYPE.LIBRARY: var Icon = LibraryIcon; var color = '#734a08'; break;
     case PLACE_TYPE.MUSEUM: var Icon = MuseumIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.CINEMA: var Icon = CinemaIcon; break;
-    case PLACE_TYPE.BURIAL_GROUND: var Icon = CemeteryIcon; break;
-    case PLACE_TYPE.PARK: var Icon = ParkIcon; break;
-    case PLACE_TYPE.PICNIC_AREA: var Icon = PicnicSiteIcon; break;
-    case PLACE_TYPE.SPORTSGROUND: var Icon = AmericanFootballIcon; break;
-    case PLACE_TYPE.AMUSEMENT: var Icon = AmusementIcon; break;
-    case PLACE_TYPE.CULTURAL: var Icon = TheatreIcon; break;
-    case PLACE_TYPE.HISTORICAL: var Icon = MuseumIcon; break;
-    case PLACE_TYPE.INDUSTRIAL: var Icon = IndustryIcon; break;
-    case PLACE_TYPE.INFORMATION: var Icon = InformationIcon; break;
-    case PLACE_TYPE.NATURAL_FEATURE: var Icon = NaturalIcon; break;
-    case PLACE_TYPE.URBAN_ART: var Icon = MonumentIcon; break;
-    default: var Icon = MarkerIcon
+    case PLACE_TYPE.CINEMA: var Icon = CinemaIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.BURIAL_GROUND: var Icon = CemeteryIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.PARK: var Icon = ParkIcon; var color = '#c8facc'; break;
+    case PLACE_TYPE.PICNIC_AREA: var Icon = PicnicSiteIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.SPORTSGROUND: var Icon = AmericanFootballIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.AMUSEMENT: var Icon = AmusementIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.CULTURAL: var Icon = TheatreIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.HISTORICAL: var Icon = MuseumIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.INDUSTRIAL: var Icon = IndustryIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.INFORMATION: var Icon = InformationIcon; var color = '#0e97d9'; break;
+    case PLACE_TYPE.NATURAL_FEATURE: var Icon = NaturalIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.URBAN_ART: var Icon = MonumentIcon; var color = '#734a08'; break;
+    default: var Icon = MarkerIcon; var color = '#734a08';
   }
 
   if (!color)
@@ -68,9 +68,9 @@ IconFactory.prototype.createSvgIcon = function(type, iconOptions = {}){
 IconFactory.prototype.getIconAnchorPos = function(placeType){
   if (placeType == PLACE_TYPE.MUSEUM){
     return { left: 10, top: 10 }
-  } else {
-    return { left: 10, top: 20 }
-  }
+  } //else {
+  //  return { left: 10, top: 20 }
+  //}
 }
 
 IconFactory.prototype.createLeafletIcon = function(type, options = {}){
@@ -81,11 +81,11 @@ IconFactory.prototype.createLeafletIcon = function(type, options = {}){
   })
 
   // Do a bit of trickery to change the icon to an svg
-  var anchorPos = this.getIconAnchorPos(type)
+  var anchorPos = this.getIconAnchorPos(type) || {}
   var icon = L.icon({
     iconUrl: 'test',
-    iconSize: [20, 20],
-    iconAnchor: [anchorPos.left, anchorPos.top],
+    iconSize: [options.width || 20, options.height || 20],
+    iconAnchor: [(anchorPos.left || (options.width || 20) / 2), (anchorPos.top || (options.height || 20) / 2)],
   })
   
   // Override the internal method so that we can return an svg
@@ -107,6 +107,10 @@ IconFactory.prototype.createLeafletIcon = function(type, options = {}){
   }
 
   return icon
+}
+
+IconFactory.prototype.createHiddenLeafletIcon = function(){
+  return this.createLeafletIcon(null, { width: 0, height: 0})
 }
 
 var instance = new IconFactory

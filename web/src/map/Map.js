@@ -232,7 +232,7 @@ Map.prototype.generatePath = function(duration){
 
   var temp_placesOfInterest = [];
 
-  getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
+  return getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
     .then(placesOfInterest => {
       //this.setState({ loading: false, })
       placesOfInterest.forEach(p => {
@@ -261,7 +261,18 @@ Map.prototype.generatePath = function(duration){
         nearest_points.push(first);
 
         var control = L.Routing.control({
-          waypoints: nearest_points,
+          //waypoints: nearest_points,
+          plan: L.Routing.plan(
+            nearest_points, 
+            {
+              createMarker: function(i, wp) {
+                return L.marker(wp.latLng, {
+                  draggable: false,
+                  icon: iconFactory.createHiddenLeafletIcon(),
+                });
+              },
+            }
+          ),
           router: L.Routing.osrmv1({
             allowUTurns: true,
             geometryOnly: true
@@ -319,16 +330,24 @@ Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
   var map = this.map;
 
   var control = L.Routing.control({
-    waypoints: [
-        start_latlng,
-        dest_latlngs
-    ],
+    plan: L.Routing.plan(
+      [ start_latlng, dest_latlngs ], 
+      {
+        createMarker: function(i, wp) {
+          return L.marker(wp.latLng, {
+            draggable: false,
+            icon: iconFactory.createHiddenLeafletIcon(),
+          });
+        },
+      }
+    ),
+    //geocoder: L.Control.Geocoder.nominatim(),
     routeWhileDragging: true,
     showAlternatives: false,
     show: false,
     collapsible: true,
     useZoomParameter: true
-  });
+  })
 
   control.addTo(map);
 
