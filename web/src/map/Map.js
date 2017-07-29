@@ -104,6 +104,7 @@ Map.prototype.onLocationFound = function(e){
   this.createRoute(location, temp_dest);*/
   this.startLocation = {lat: e.latlng.lat, long: e.latlng.lng }
   this.maybeFinishLoading()
+  //this.createTempRoute(location, temp_dest);
 }
 
 Map.prototype.maybeFinishLoading = function(){
@@ -120,7 +121,7 @@ Map.prototype.on = function(eventType, func){
   this.handlers_[eventType].push(func)
 }
 
-Map.prototype.createRoute = function(start_latlng, dest_latlngs){
+Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
   var L = window.L;
   var map = this.map;
 
@@ -132,10 +133,15 @@ Map.prototype.createRoute = function(start_latlng, dest_latlngs){
     routeWhileDragging: true,
     showAlternatives: false,
     show: false,
-    collapsible: true
+    collapsible: true,
+    useZoomParameter: true
   });
-  
+
   control.addTo(map);
+
+  map.on('zoomend', function() {
+    control.route();
+  });
 }
 
 
@@ -144,13 +150,11 @@ Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
   var markerOptions = { title: placeOfInterest.title }
   
   markerOptions.icon = this.iconFactory_.createLeafletIcon(placeOfInterest.type)
-  
-
 
   var marker = L.marker(
     [placeOfInterest.lat, placeOfInterest.long],
     markerOptions,
-  ).addTo(this.map)
+  ).addTo(this.map);
   
   if (options.onClick){
     marker.on('click', (e) => options.onClick(e, placeOfInterest, marker))
