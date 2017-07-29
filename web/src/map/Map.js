@@ -1,6 +1,7 @@
 
 function Map(){
   this.placesOfInterest_ = []
+  this.map = null;
 }
 
 Map.prototype.load = function(container){
@@ -8,8 +9,10 @@ Map.prototype.load = function(container){
 
   this.map.on('locationerror', (e) => this.onLocationError(e))
 
+  this.map.on('locationfound', (e) => this.onLocationFound(e));
+  //map.on('locationerror', that.onLocationError);
 
-  this.map.locate({setView: true, maxZoom: 16,})
+  this.map.locate({setView: true, maxZoom: 16,});
 
   // Load tiles
   window.L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -18,7 +21,8 @@ Map.prototype.load = function(container){
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
       'Imagery © <a href="http://mapbox.com">Mapbox</a>',
     id: 'mapbox.streets'
-  }).addTo(this.map)
+  }).addTo(this.map);
+
 }
 
 Map.prototype.onLocationError = function(error){
@@ -28,6 +32,15 @@ Map.prototype.onLocationError = function(error){
   this.map.setView([-42.88234, 147.33047], 16)
 }
 
+Map.prototype.onLocationFound = function(e){
+  var radius = e.accuracy / 2;
+  var location = e.latlng;
+
+  var map = this.map;
+
+  window.L.marker(location).addTo(this.map);
+  window.L.circle(location, radius).addTo(this.map);
+}
 
 
 export default Map
