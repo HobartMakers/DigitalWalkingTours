@@ -21,6 +21,7 @@ const styles = {
   '@global body': {
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
+    fontFamily: "'Roboto', sans-serif",
   },
   app: {
     width: '100vw',
