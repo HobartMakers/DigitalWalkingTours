@@ -55,7 +55,8 @@ IconFactory.prototype.createSvgIcon = function(type, iconOptions = {}){
     default: var Icon = MarkerIcon; var color = '#734a08';
   }
 
-  if (!color)
+  // The color in options takes precedence
+  if (iconOptions.color)
     color = iconOptions.color
 
   ReactDOM.render(<Icon 

@@ -7,6 +7,9 @@ import RouteError from './RouteError'
 const ROUTE_360_API_KEY = '4UH6GBMYTDBEZSXZ6FUWL0E'
 const DEFAULT_LATLNG = window.L.latLng(-42.88234, 147.33047);
 
+// If true the second location pin placing will simulate the user moving their
+// physical location
+const SIMULATE_MOVING = false
 
 function Map(){
   this.iconFactory_ = iconFactory
@@ -63,8 +66,12 @@ Map.prototype.load = function(container){
     var markerOptions = { title: 'Start Location' }
     markerOptions.icon = this.iconFactory_.createLeafletIcon('startLocation')
 
-    this.manualStartLocation = e.latlng
-
+    if (this.startLocation  && SIMULATE_MOVING){
+      this.positionUser(e.latlng)
+      return
+    } else {
+      this.manualStartLocation = e.latlng
+    }
     if (this.startMarker){
       this.startMarker.remove()
       var index = this.controls.indexOf(this.startMarker)
@@ -205,7 +212,6 @@ Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesO
         //that.addPlaceOfInterest(nearest);
       });
 
-      console.log(nearest_points);
       //var first = nearest_points[0];
       //nearest_points.push(first);
       nearest_points.splice(0, 0, startLocation)
@@ -365,16 +371,59 @@ Map.prototype.onLocationFound = function(e){
   this.createRoute(location, temp_dest);*/
 
   // If this is the first time ever loading set the view
-
   if (!this.startLocation)
-  this.map.setView([e.latlng.lat, e.latlng.lng], 16)
+    this.map.setView([e.latlng.lat, e.latlng.lng], 16)
 
-  this.startLocation = e.latlng; //{lat: e.latlng.lat, long: e.latlng.lng }
-  if (this.lastCircle)
-    this.lastCircle.remove()
-  this.lastCircle = L.circle(e.latlng, 5).addTo(this.map)
+  this.positionUser(e.latlng)
   this.maybeFinishLoading()
   //this.createTempRoute(location, temp_dest);
+}
+
+Map.prototype.positionUser = function(latlng){
+  this.startLocation = latlng; //{lat: e.latlng.lat, long: e.latlng.lng }
+  if (this.lastCircle)
+    this.lastCircle.remove()
+  this.lastCircle = L.circle(latlng, 5).addTo(this.map)
+
+  // Check for points of interest collisions
+  this.checkForPointsOfInterestCollisions(latlng)
+}
+
+function distanceBetweenPoints(x1, y1, x2, y2){
+  var a = x1 - x2
+  var b = y1 - y2
+
+  return Math.sqrt( a*a + b*b )
+}
+
+Map.prototype.checkForPointsOfInterestCollisions = function(latlng){
+  if (!this.placesOfInterest) return
+  
+  var closestP = null,
+    closestDis = null
+  this.placesOfInterest
+  // Filter out points of interest that don't have a marker, we don't care about
+  // those
+  .filter(p => p.__marker)
+  .forEach(p => {
+    var dis = distanceBetweenPoints(latlng.lat, latlng.lng, p.lat, p.long)
+    if (closestP == null || dis < closestDis){
+      closestP = p
+      closestDis = dis
+    } 
+  })
+
+
+  if (!closestP) return
+    
+  // If the closest point is less than 10 meters a way flag it up as close
+  var meterIsh = 0.00001 // actually 1.1 meters
+
+  if (closestDis > meterIsh * 10) return
+
+  ;(this.handlers_['placeOfInterestClose'] || []).forEach(func => 
+    func(closestP, closestP.__marker)
+  )
 }
 
 Map.prototype.maybeFinishLoading = function(){
@@ -445,6 +494,8 @@ Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
   })
   this.controls.push(marker)
   
+  // Meh... nasty as hell but it's a hackathon, lets just get this working
+  placeOfInterest.__marker = marker
 }
 
 Map.prototype.clear = function(){

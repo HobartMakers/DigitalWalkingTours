@@ -118,6 +118,7 @@ class App extends Component {
   componentDidMount = () => {
     map.on('load', () => this.setState({ initializing: false }))
     map.on('placeOfInterestClick', (e, poi, marker) => this.onPlaceOfInterestClick(e, poi, marker))
+    map.on('placeOfInterestClose', (poi, marker) => this.onPlaceOfInterestClose(poi, marker))
     map.load(this.mapEle_)
     this.updatePlacesOfInterest()
   };
@@ -196,15 +197,49 @@ class App extends Component {
       sideMenuOpen: true,
       selectedMarker: marker,
       selectedPoi: poi,
+      autoSelectedMarker: null,
+      autoSelectedPoi: null,
+      lastDisplayedAutoPoi: poi,
     })
   };
 
-  unselectMarker = () => {
-    const { selectedMarker, selectedPoi } = this.state
-    if (!selectedMarker) return
+  onPlaceOfInterestClose = (poi, marker) => {
+    // If something is already selected, don't unselect it, that would be
+    // annoying
+    if (this.state.selectedMarker) return
 
-    var icon = iconFactory.createLeafletIcon(selectedPoi.type)
-    selectedMarker.setIcon(icon)
+    // Action has already been taken don't display the same thing again
+    // anoyingly
+    if (poi == this.state.lastDisplayedAutoPoi) return
+
+    this.unselectMarker()
+    // Change the icon
+    var icon = iconFactory.createLeafletIcon(poi.type, {color: 'purple'})
+    marker.setIcon(icon)
+    
+    this.setState({
+      sideMenuOpen: true,
+      autoSelectedMarker: marker,
+      autoSelectedPoi: poi,
+      // If the user's location updates again but they've already closed the
+      // closest point of interest we need to know this to not display it
+      // again
+      lastDisplayedAutoPoi: poi,
+    })
+    
+  };
+
+  unselectMarker = () => {
+    const { selectedMarker, selectedPoi, autoSelectedMarker, autoSelectedPoi } = this.state
+    if (selectedMarker) {
+      var icon = iconFactory.createLeafletIcon(selectedPoi.type)
+      selectedMarker.setIcon(icon)
+    }
+    if (autoSelectedMarker) {
+      var icon = iconFactory.createLeafletIcon(autoSelectedPoi.type)
+      autoSelectedMarker.setIcon(icon)
+      
+    }
   }
 
   state = {
@@ -217,10 +252,15 @@ class App extends Component {
 
   closeSideMenu = () => {
     this.unselectMarker()
-    this.setState({ sideMenuOpen: false })
+    
+    this.setState({ 
+      sideMenuOpen: false,
+      selectedMarker: null,
+      selectedPoi: null,
+      autoSelectedMarker: null,
+      autoSelectedPoi: null,
+    })
   };
-
-  toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
 
   toggleOptionsMenu = () => {
     
@@ -287,13 +327,14 @@ class App extends Component {
     var { 
       sideMenuOpen, 
       selectedPoi, 
+      autoSelectedPoi,
       initializing, 
       loading,
       optionsOpen, 
       inTour,
       errorMessage, 
     } = this.state
-    selectedPoi = selectedPoi || {}
+    selectedPoi = selectedPoi || autoSelectedPoi || {}
 
     console.log(errorMessage)
 
