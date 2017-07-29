@@ -239,7 +239,8 @@ class App extends Component {
     })
 
     map.generatePath(20)
-    .then(() => {
+    .then((routes) => {
+      
       this.setState({
         loading: false,
         inTour: true,

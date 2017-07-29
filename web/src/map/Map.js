@@ -182,7 +182,10 @@ Map.prototype.onLocationError = function(error){
 }
 
 Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesOfInterest, distance_km){
-  return new Promise((resolve, reject) => {
+  
+  var remainingPlacesOfInterest = this.placesOfInterest.slice(0)
+  
+  return Promise.resolve(new Promise((resolve, reject) => {
     var points = this.createPoints(center_point, distance_km);
     var nearest_points = [];
     var nearestPlacesOfInterest = []
@@ -196,6 +199,8 @@ Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesO
         var nearest_latlng = window.L.latLng(nearest.lat, nearest.long);
         nearest_points.push(nearest_latlng);
         nearestPlacesOfInterest.push(nearest)
+        remainingPlacesOfInterest.splice(remainingPlacesOfInterest.indexOf(nearest), 1)
+        
         //console.log("findNearest returned:", nearest);
         //that.addPlaceOfInterest(nearest);
       });
@@ -253,7 +258,68 @@ Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesO
 
       // Must be done last else points of interest are not clickable
       nearestPlacesOfInterest.forEach(p => this.addPlaceOfInterest(p))
+  }))
+  .then(routes => {
+    var coordinates = routes.routes[0].coordinates
+
+    // Figure out if any of the other points of interest lie close to the path
+    var closePoints = remainingPlacesOfInterest.filter(p => isPlaceCloseToPath(p, coordinates))
+    closePoints.forEach(p => this.addPlaceOfInterest(p))
   })
+
+}
+
+function isPlaceCloseToPath(place, coordinates){
+  var point = [place.lat, place.long]
+
+  for (var i = 0; i < (coordinates.length -1); i++){
+    var c1 = coordinates[i],
+      c2 = coordinates[i + 1]
+
+    if (isPointCloseToLine(point, [c1.lat, c1.lng], [c2.lat, c2.lng]))
+      return true 
+  }
+  return false
+}
+
+function isPointCloseToLine(point, c1, c2){
+  var dis = pDistance(point[0], point[1], c1[0], c1[1], c2[0], c2[1])
+  var threshold = 0.0005
+  return dis < threshold
+}
+
+// Taken from https://stackoverflow.com/a/6853926/837649
+function pDistance(x, y, x1, y1, x2, y2) {
+
+  var A = x - x1;
+  var B = y - y1;
+  var C = x2 - x1;
+  var D = y2 - y1;
+
+  var dot = A * C + B * D;
+  var len_sq = C * C + D * D;
+  var param = -1;
+  if (len_sq != 0) //in case of 0 length line
+      param = dot / len_sq;
+
+  var xx, yy;
+
+  if (param < 0) {
+    xx = x1;
+    yy = y1;
+  }
+  else if (param > 1) {
+    xx = x2;
+    yy = y2;
+  }
+  else {
+    xx = x1 + param * C;
+    yy = y1 + param * D;
+  }
+
+  var dx = x - xx;
+  var dy = y - yy;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 Map.prototype.generatePath = function(duration){
@@ -270,8 +336,13 @@ Map.prototype.generatePath = function(duration){
   var center_point = this.getNextPoint(startLocation, Math.random() * 360, radius);
   //var points = this.createRoute(duration);
 
+  
   return getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
   .then(placesOfInterest => {
+    // getPointsOfInterest should probably happen outside of this class and we
+    // pass the points in but will take time to refactor
+    // Instead going to store a reference of last fetched points
+    this.placesOfInterest = placesOfInterest
     //this.setState({ loading: false, })
     if (placesOfInterest.length < 2)
       throw new RouteError(`Not enough places of interest. Try dropping a pin somewhere else, for example, Hobart.`)
