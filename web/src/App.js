@@ -26,9 +26,14 @@ const styles = {
   },
   app: {
     width: '100vw',
-    height: '100vh',
+    //height: '100vh',
     //backgroundImage: `url(${require('./testMap.png')})`,
     //backgroundSize: 'cover',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   buttonContainer: {
     textAlign: 'center',
@@ -48,8 +53,13 @@ const styles = {
   },
   mapContainer: {
     width: '100vw',
-    height: '100vh',
+    //height: '100vh',
     transition: 'opacity 0.3s',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   menuButton: {
     position: 'absolute',
@@ -59,6 +69,7 @@ const styles = {
   },
   content: {
     position: 'relative',
+    height: '100%',
   },
   loading: {
     position: 'fixed !important',
@@ -95,7 +106,7 @@ const optionsMenuStyles = {
     right: 0,
     width: 80,
     top: 0,
-    height: '100vh',
+    bottom: 0,
   },
 }
 

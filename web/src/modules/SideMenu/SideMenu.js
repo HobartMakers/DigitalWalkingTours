@@ -7,7 +7,8 @@ import POIOverview from './../POIOverview'
 const styles = {
   sideMenu: {
     position: 'fixed',
-    height: '100vh',
+    //height: '100vh',
+    bottom: 0,
     overflowY: 'auto',
     width: '50%',
     backgroundColor: 'white',
