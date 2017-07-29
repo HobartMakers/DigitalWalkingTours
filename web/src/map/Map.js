@@ -74,9 +74,9 @@ Map.prototype.load = function(container){
   }).addTo(this.map);
 
   this.layer.on('load', e => this.onLayerLoad(e))
-  window.L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
+  /*window.L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors'
-  }).addTo(this.map);
+  }).addTo(this.map);*/
 
 }
 

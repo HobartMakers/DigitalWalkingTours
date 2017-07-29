@@ -67,7 +67,21 @@ const styles = {
     bottom: 0,
     textAlign: 'center',
   },
+  
 }
+
+const optionsMenuStyles = {
+  optionsMenu: {
+    position: 'fixed',
+    right: 0,
+    width: 80,
+    top: 0,
+    height: '100vh',
+  },
+}
+
+const OptionsMenu = injectStyles(optionsMenuStyles)(
+  ({classes, ...props}) => <SideMenu {...props} className={classes.optionsMenu} />)
 
 class App extends Component {
 
@@ -167,6 +181,8 @@ class App extends Component {
     sideMenuOpen: false,
     initializing: true,
     loading: false,
+    optionsOpen: false,
+    inTour: false,
   };
 
   closeSideMenu = () => {
@@ -175,6 +191,14 @@ class App extends Component {
   };
 
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
+
+  toggleOptionsMenu = () => {
+    
+    this.setState({ 
+      sideMenuOpen: false,
+      optionsOpen: !this.state.optionsOpen, 
+    })
+  }
 
   startTour = () => {
     //var points = map.createRoute();
@@ -188,6 +212,7 @@ class App extends Component {
     .then(() => {
       this.setState({
         loading: false,
+        inTour: true,
       })
     })
 
@@ -209,44 +234,51 @@ class App extends Component {
     }) */
   }
 
+  stopTour = () => {
+    
+  };
+
   render() {
     const { classes } = this.props
-    var { sideMenuOpen, selectedPoi, initializing, loading } = this.state
+    var { sideMenuOpen, selectedPoi, initializing, loading, optionsOpen, inTour } = this.state
     selectedPoi = selectedPoi || {}
 
     return <Motion 
       defaultStyle={{
         menuX: 50,
         contentX: 0,
+        optionsMenuX: 80,
       }} 
       style={{
         menuX: spring(sideMenuOpen ? 0 : 50),
-        contentX: spring(sideMenuOpen ? -25 : 0),
+        contentX: spring(sideMenuOpen ? -25 : (optionsOpen ? -40 : 0)),
+        optionsMenuX: spring(optionsOpen ? 0 : 80),
       }}
     >
       {value => <div className={classes.app}>
         <div onClick={this.closeSideMenu}
           className={classes.content}
-          style={{transform: `translateX(${value.contentX}vw)`}} 
+          style={{transform: `translateX(${value.contentX}${sideMenuOpen ? 'vw' : 'px'})`}} 
         >
           <div 
             className={classes.mapContainer} 
             ref={el => this.mapEle_ = el} 
             style={{opacity: initializing ? 0 : 1}}
           />
-          {initializing ? null : <div className={classes.buttonContainer}>
+          {(initializing || inTour) ? null : <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
               <Button 
                 className={classes.startTourButton} 
                 onClick={this.startTour}
+                onClick={loading ? null : (inTour ? this.stopTour : this.startTour)}
                 disabled={loading}
               >
-                {loading ? 'Retrieving...' : 'Start Tour'}
+                {loading ? 'Retrieving...' : (inTour ? 'Stop' : 'Start Tour')}
               </Button>
             </div>
           </div>}
         </div>
-        {/*initializing ? null : <FloatingButton className={classes.menuButton} onClick={this.toggleSideMenu}>
+        {/*initializing ? null : <FloatingButton className={classes.menuButton} onClick={this.toggleOptionsMenu}>
           <svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24">
             <path d="M0 0h24v24H0z" fill="none" />
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
@@ -258,6 +290,10 @@ class App extends Component {
           poiTitle={selectedPoi.title}
           poiContent={selectedPoi.contents}
           poiImages={selectedPoi.images}
+        />}
+        {initializing ? null : <OptionsMenu
+          open={optionsOpen}
+          style={{transform: `translateX(${value.optionsMenuX}px)`}} 
         />}
         {initializing ? <Loader className={classes.loading} /> : null}
       </div>}
