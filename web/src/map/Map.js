@@ -6,10 +6,10 @@ const ROUTE_360_API_KEY = '4UH6GBMYTDBEZSXZ6FUWL0E'
 const DEFAULT_LATLNG = window.L.latLng(-42.88234, 147.33047);
 
 function Map(){
-  this.placesOfInterest_ = []
   this.iconFactory_ = iconFactory
   this.map = null;
   this.myLocation = DEFAULT_LATLNG;
+  this.handlers_ = {}
 }
 
 Map.prototype.load = function(container){
@@ -21,13 +21,14 @@ Map.prototype.load = function(container){
   this.map.locate({setView: true, maxZoom: 16,});
 
   // Load tiles
-  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+  this.layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
       'Imagery © <a href="http://mapbox.com">Mapbox</a>',
     id: 'mapbox.streets'
   }).addTo(this.map);
+  this.layer.on('load', e => this.onLayerLoad(e))
 
   window.L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors'
@@ -58,6 +59,11 @@ Map.prototype.getNextPoint = function(lat_lng, angle_deg, distance_km){
   return window.L.latLng(next_point_lat, next_point_lon);
 }
 
+
+Map.prototype.onLayerLoad = function(){
+  this.layerLoaded = true
+  this.maybeFinishLoading()
+}
 Map.prototype.createRoute = function(container){
     console.log("Creating route");
 
@@ -129,11 +135,15 @@ Map.prototype.onLocationError = function(error){
   console.error(error)
 
   // Fall back to a default location of the Old Mercury Building
-  this.map.setView([-42.88234, 147.33047], 16);
+  var defaultStartLocation = { lat: -42.88234, long: 147.33047 }
+  this.map.setView(defaultStartLocation.lat, defaultStartLocation.long, 16)
+  
+  this.startLocation = defaultStartLocation
+  this.maybeFinishLoading()
 }
 
 Map.prototype.onLocationFound = function(e){
-  var radius = e.accuracy / 2;
+  /*var radius = e.accuracy / 2;
   var location = e.latlng;
 
   var map = this.map;
@@ -142,7 +152,24 @@ Map.prototype.onLocationFound = function(e){
   window.L.circle(location, radius).addTo(this.map);
   console.log(location);
   var temp_dest = window.L.latLng(-42.855165, 147.297478);
-  this.createTempRoute(location, temp_dest);
+  this.createRoute(location, temp_dest);*/
+  this.startLocation = {lat: e.latlng.lat, long: e.latlng.lng }
+  this.maybeFinishLoading()
+  //this.createTempRoute(location, temp_dest);
+}
+
+Map.prototype.maybeFinishLoading = function(){
+  if (!this.layerLoaded || !this.startLocation) return
+  ;(this.handlers_['load'] || []).forEach(handler => handler())
+}
+
+Map.prototype.getStartLocation = function(){
+  return this.startLocation
+};
+
+Map.prototype.on = function(eventType, func){
+  this.handlers_[eventType] = this.handlers_[eventType] || []
+  this.handlers_[eventType].push(func)
 }
 
 Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
