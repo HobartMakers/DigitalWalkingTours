@@ -7,6 +7,7 @@ import PLACE_TYPE from './map/PLACE_TYPE'
 import SideMenu from './modules/SideMenu'
 import FloatingButton from './modules/FloatingButton'
 var Urban_Art = require('./Urban_Art.json')
+var Hobart_Facilities = require('./Hobart_Facilities.json')
 
 const map = new Map
 
@@ -98,7 +99,8 @@ class App extends Component {
       )
     })
     */
-    window.L.geoJSON(Urban_Art).addTo(map.map);
+    //window.L.geoJSON(Hobart_Facilities).addTo(map.map);
+    //window.L.geoJSON(Urban_Art).addTo(map.map);
   };
 
   state = {
@@ -108,6 +110,16 @@ class App extends Component {
   closeSideMenu = () => this.setState({ sideMenuOpen: false });
 
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
+
+  startTour = () => {
+    var points = map.createRoute();
+
+    points.forEach(function(element) { 
+      console.log(element);
+      window.L.marker(element).addTo(map.map)
+    });
+    
+  }
 
   render() {
     const { classes } = this.props
@@ -121,7 +133,7 @@ class App extends Component {
           />
           <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
-              <Button className={classes.startTourButton}>Start Tour</Button>
+              <Button className={classes.startTourButton} onClick={this.startTour}>Start Tour</Button>
             </div>
           </div>
         </div>
