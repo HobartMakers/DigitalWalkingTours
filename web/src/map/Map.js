@@ -135,72 +135,6 @@ Map.prototype.onLayerLoad = function(){
   this.maybeFinishLoading();
 }
 
-Map.prototype.createRoute = function(duration){
-    console.log("createRoute");
-
-    var default_speed_km = 5.5;
-    var default_duration = duration;
-
-    var total_dist_km = default_speed_km * (default_duration / 60);
-
-    //console.log("Total dist = " + total_dist_km + "km.");
-    // Need current location
-    /*if ("geolocation" in navigator) {
-      console.log("geolocation is available");
-      navigator.geolocation.getCurrentPosition(function(position) {
-        // FIXME - doesn't work yet
-        //console.log("Latitude: " +position.coords.latitude + " Longitude: " + position.coords.longitude);
-      });
-    } else {
-      console.log("geolocation IS NOT available");
-    }*/
-
-    // Pick a random point 0.5 km away (average person walks 6km/h, a square with 0.5km sides == a 2km/20min walk)
-    var distance_km = 0.5;
-
-    // FIXME - make this use geolocation
-    var current_lat = -42.88234;
-    var current_lon = 147.33047;
-  
-    var lat_km_per_degree = 110;
-    var lon_km_per_degree = Math.cos(current_lat * (Math.PI / 180)) * lat_km_per_degree;
-
-    // Now we know how many lat/lon degrees away represent distance_km at this point on the globe
-    var lat_diff = distance_km / lat_km_per_degree;
-    var lon_diff = distance_km / lon_km_per_degree;
-
-    //console.log(lat_km_per_degree);
-    //console.log(lon_km_per_degree);
-
-    var point0 = [current_lat, current_lon];
-    var point1 = [current_lat, current_lon - lon_diff];
-    var point2 = [current_lat + lat_diff, current_lon - lon_diff];
-    var point3 = [current_lat + lat_diff, current_lon];
-
-    var num_points = 8;
-    var delta_deg = 360/num_points;
-
-    var radius = total_dist_km / (2 * Math.PI);
-
-    var center_point = this.getNextPoint(this.myLocation, 0, radius);
-
-    var points = [];
-    points.push(center_point);
-
-    for(var i = 0; i < num_points; i++){
-      var tp = this.getNextPoint(center_point, delta_deg * i, radius);
-      points.push(tp);
-    }
-    /*
-    point0 = this.getNextPoint(center_point, 0, radius);
-    point1 = this.getNextPoint(center_point, 90, radius);
-    point2 = this.getNextPoint(center_point, 180, radius);
-    point3 = this.getNextPoint(center_point, 270, radius); */
-
-    //return [center_point, point0, point1, point2, point3];
-    return points;
-}
-
 Map.prototype.createPoints = function(center_point, distance_km){
 
   console.log("createPoints");
@@ -320,8 +254,8 @@ Map.prototype.generatePath = function(duration){
 
   var startLocation = this.getStartLocation()
 
-  var center_point = this.getNextPoint(startLocation, 0, radius);
-  var points = this.createRoute(duration);
+  var center_point = this.getNextPoint(startLocation, Math.random() * 360, radius);
+  //var points = this.createRoute(duration);
 
   return getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
   .then(placesOfInterest => {
