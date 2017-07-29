@@ -55,8 +55,22 @@ Map.prototype.load = function(container){
 
   this.map.on('locationerror', (e) => this.onLocationError(e));
   this.map.on('locationfound', (e) => this.onLocationFound(e));
+  this.map.on('contextmenu', (e) => {
+    //do something ...
+    debugger
 
-  this.map.locate({setView: true, maxZoom: 16, watch: true});
+    var markerOptions = { title: 'Start Location' }
+    markerOptions.icon = this.iconFactory_.createLeafletIcon('startLocation')
+
+    this.manualStartLocation = e.latlng
+
+    var marker = L.marker(
+      e.latlng,
+      markerOptions,
+    ).addTo(this.map)
+  });
+
+  this.map.locate({setView: true, watch: true});
 
   // Load tiles
   /*this.layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -231,7 +245,9 @@ Map.prototype.generatePath = function(duration){
 
   //console.log("Radius: " + radius);
 
-  var center_point = this.getNextPoint(this.startLocation, 0, radius);
+  var startLocation = this.getStartLocation()
+
+  var center_point = this.getNextPoint(startLocation, 0, radius);
   var points = this.createRoute(duration);
     
   var that = this;
@@ -267,8 +283,8 @@ Map.prototype.generatePath = function(duration){
         console.log(nearest_points);
         //var first = nearest_points[0];
         //nearest_points.push(first);
-        nearest_points.splice(0, 0, this.startLocation)
-        nearest_points.push(this.startLocation)
+        nearest_points.splice(0, 0, startLocation)
+        nearest_points.push(startLocation)
 
         var control = L.Routing.control({
           //waypoints: nearest_points,
@@ -283,10 +299,10 @@ Map.prototype.generatePath = function(duration){
               },
             }
           ),
-          router: L.Routing.osrmv1({
+          router: /*L.Routing.osrmv1({
             allowUTurns: true,
             geometryOnly: true
-          }),
+          }),*/ L.Routing.mapbox('pk.eyJ1IjoiYWxseWN3IiwiYSI6ImNqNXA5ZDk4NTA4NTkyd211bTBvOGxpN28ifQ.mx0X6eehCGTmx9_ZBzPkSg'),
           routeWhileDragging: true,
           showAlternatives: false,
           show: false,
@@ -335,7 +351,7 @@ Map.prototype.maybeFinishLoading = function(){
 }
 
 Map.prototype.getStartLocation = function(){
-  return this.startLocation
+  return this.manualStartLocation || this.startLocation
 };
 
 Map.prototype.on = function(eventType, func){

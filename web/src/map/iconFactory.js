@@ -51,6 +51,7 @@ IconFactory.prototype.createSvgIcon = function(type, iconOptions = {}){
     case PLACE_TYPE.INFORMATION: var Icon = InformationIcon; var color = '#0e97d9'; break;
     case PLACE_TYPE.NATURAL_FEATURE: var Icon = NaturalIcon; var color = '#734a08'; break;
     case PLACE_TYPE.URBAN_ART: var Icon = MonumentIcon; var color = '#734a08'; break;
+    case 'startLocation': var Icon = MarkerIcon; width=40; height=40; color='red';break;
     default: var Icon = MarkerIcon; var color = '#734a08';
   }
 
@@ -69,7 +70,9 @@ IconFactory.prototype.createSvgIcon = function(type, iconOptions = {}){
 IconFactory.prototype.getIconAnchorPos = function(placeType){
   if (placeType == PLACE_TYPE.MUSEUM){
     return { left: 10, top: 10 }
-  } //else {
+  } else if (placeType == 'startLocation'){
+    return {left: 20, top: 40 }  
+  }//else {
   //  return { left: 10, top: 20 }
   //}
 }
