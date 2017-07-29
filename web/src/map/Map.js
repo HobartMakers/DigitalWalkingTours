@@ -79,7 +79,7 @@ Map.prototype.load = function(container){
     
   });
 
-  this.map.locate({setView: true, watch: true});
+  this.map.locate({setView: false, watch: true});
 
   // Load tiles
   /*this.layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -278,7 +278,7 @@ Map.prototype.generatePath = function(duration){
 Map.prototype.onLocationFound = function(e){
   /*var radius = e.accuracy / 2;
   var location = e.latlng;
-
+  
   var map = this.map;
 
   window.L.marker(location).addTo(this.map);
@@ -286,6 +286,12 @@ Map.prototype.onLocationFound = function(e){
   console.log(location);
   var temp_dest = window.L.latLng(-42.855165, 147.297478);
   this.createRoute(location, temp_dest);*/
+
+  // If this is the first time ever loading set the view
+
+  if (!this.startLocation)
+  this.map.setView([e.latlng.lat, e.latlng.lng], 16)
+
   this.startLocation = e.latlng; //{lat: e.latlng.lat, long: e.latlng.lng }
   if (this.lastCircle)
     this.lastCircle.remove()
