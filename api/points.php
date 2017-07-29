@@ -1,8 +1,10 @@
 <?php
 
-$x = $_GET['x'];
-$y = $_GET['y'];
-$radius = $_GET['radius'];
+$time_start = microtime(true);
+
+$x = floatval($_GET['x']);
+$y = floatval($_GET['y']);
+$radius = floatval($_GET['radius']);
 
 //$x = -42.88234;
 //$y = 147.33047;
@@ -97,9 +99,16 @@ $filtered = array_values(array_filter($features, function($var) {
 //            'features' => $filtered];
 
 header('Content-type: application/json');
-$origin = rtrim($_SERVER['HTTP_REFERER'], "/");
-//$origin = $_SERVER['REMOTE_ADDR'];
-header("Access-Control-Allow-Origin: $origin");
+
+if (array_key_exists('HTTP_REFERER', $_SERVER)) {
+    $origin = rtrim($_SERVER['HTTP_REFERER'], "/");
+    header("Access-Control-Allow-Origin: $origin");
+}
+
 header("Access-Control-Allow-Headers: Content-Type");
 echo json_encode($filtered);
+
+$time_end = microtime(true);
+$seconds = $time_end - $time_start;
+error_log(sprintf("points.php ran in %.2f seconds", $seconds));
 
