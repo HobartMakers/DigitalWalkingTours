@@ -27,18 +27,26 @@ function calcDistance(lat_1, lon_1, lat_2, lon_2) {
     return km_diff;
 }
 
-// FIXME Completely untested
 Map.prototype.findNearest = function(ideal_point, actual_points) {
     var nearest_distance = 9999;
     var nearest = null;
 
+    console.log("Finding nearest");
+
+    for (var i = 0; i < actual_points.length; i++) {
+        console.log(actual_points[i]);
+    }
+
     actual_points.forEach(function(point) {
-        var this_distance = calcDistance(ideal_point['lat'], ideal_point['long'], point['lat'], point['long']);
+        
+        var this_distance = calcDistance(ideal_point['lat'], ideal_point['lng'], point['lat'], point['long']);
         if ((this_distance) < nearest_distance) {
             nearest_distance = this_distance;
             nearest = point;
-        }   
+        } 
+        
     });
+
     return nearest;
 }
 
@@ -70,10 +78,12 @@ Map.prototype.load = function(container){
 // Path finding - get next point in a circular polygon
 Map.prototype.getNextPoint = function(lat_lng, angle_deg, distance_km){
 
+  console.log("getNextPoint");
+
   var s_lat = lat_lng.lat;
   var s_lon = lat_lng.lng;
 
-  console.log("latng: " , s_lat , " ", s_lon);
+  //console.log("latng: " , s_lat , " ", s_lon);
 
   var lat_km_per_degree = 110;
   var lon_km_per_degree = Math.cos(s_lat * (Math.PI / 180)) * lat_km_per_degree;
@@ -82,15 +92,15 @@ Map.prototype.getNextPoint = function(lat_lng, angle_deg, distance_km){
   var lat_diff = distance_km / lat_km_per_degree;
   var lon_diff = distance_km / lon_km_per_degree;
 
-  console.log("Lat diff: " + lat_diff);
-  console.log("Lon diff: " + lon_diff);
+  //console.log("Lat diff: " + lat_diff);
+  //console.log("Lon diff: " + lon_diff);
 
   var deg_rad = angle_deg * (Math.PI / 180);
 
   var next_point_lat = s_lat + lat_diff * Math.cos(deg_rad);
   var next_point_lon = s_lon + lon_diff * Math.sin(deg_rad);
 
-  console.log("Next lat: " + next_point_lat + ", lon: " + next_point_lon);
+  //console.log("Next lat: " + next_point_lat + ", lon: " + next_point_lon);
 
   return window.L.latLng(next_point_lat, next_point_lon);
 }
@@ -102,20 +112,20 @@ Map.prototype.onLayerLoad = function(){
 }
 
 Map.prototype.createRoute = function(duration){
-    console.log("Creating route");
+    console.log("createRoute");
 
     var default_speed_km = 5.5;
     var default_duration = duration;
 
     var total_dist_km = default_speed_km * (default_duration / 60);
 
-    console.log("Total dist = " + total_dist_km + "km.");
+    //console.log("Total dist = " + total_dist_km + "km.");
     // Need current location
     if ("geolocation" in navigator) {
       console.log("geolocation is available");
       navigator.geolocation.getCurrentPosition(function(position) {
         // FIXME - doesn't work yet
-        console.log("Latitude: " +position.coords.latitude + " Longitude: " + position.coords.longitude);
+        //console.log("Latitude: " +position.coords.latitude + " Longitude: " + position.coords.longitude);
       });
     } else {
       console.log("geolocation IS NOT available");
@@ -135,8 +145,8 @@ Map.prototype.createRoute = function(duration){
     var lat_diff = distance_km / lat_km_per_degree;
     var lon_diff = distance_km / lon_km_per_degree;
 
-    console.log(lat_km_per_degree);
-    console.log(lon_km_per_degree);
+    //console.log(lat_km_per_degree);
+    //console.log(lon_km_per_degree);
 
     var point0 = [current_lat, current_lon];
     var point1 = [current_lat, current_lon - lon_diff];
@@ -169,7 +179,7 @@ Map.prototype.createRoute = function(duration){
 
 Map.prototype.createPoints = function(center_point, distance_km){
 
-
+  console.log("createPoints");
   
   var lat_km_per_degree = 110;
   var lon_km_per_degree = Math.cos(center_point.lat * (Math.PI / 180)) * lat_km_per_degree;
@@ -184,7 +194,7 @@ Map.prototype.createPoints = function(center_point, distance_km){
   var radius = distance_km / (2 * Math.PI);
 
   var points = [];
-  points.push(center_point);
+  //points.push(center_point);
 
   for(var i = 0; i < num_points; i++){
     var tp = this.getNextPoint(center_point, delta_deg * i, radius);
@@ -208,33 +218,44 @@ Map.prototype.onLocationError = function(error){
 
 Map.prototype.generatePath = function(duration){
 
-  console.log("Genrating path");
+  console.log("Generating path");
 
   var distance_km = (duration * 5) / 60;
   var radius = distance_km / (2 * Math.PI);
 
-  console.log("Radius: " + radius);
+  //console.log("Radius: " + radius);
 
   var center_point = this.getNextPoint(this.startLocation, 0, radius);
   var points = this.createRoute(duration);
     
   var that = this;
 
+  var temp_placesOfInterest = [];
+
   getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
     .then(placesOfInterest => {
       //this.setState({ loading: false, })
       placesOfInterest.forEach(p => {
-        that.placesOfInterest.push(p);
+        temp_placesOfInterest.push(p);
         //this.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
       })
     })
-
-  var points = this.createPoints(center_point, distance_km);
-  var that = this;
-  points.forEach(function(element) {
-      console.log(element);
-      window.L.marker(element).addTo(that.map);
+    .then(() => {
+      var points = this.createPoints(center_point, distance_km);
+      points.forEach(function(element) {
+          //console.log(element);
+          window.L.marker(element).addTo(that.map);
+       
+          //console.log("placesOfInterest:", temp_placesOfInterest);
+     
+          var nearest = that.findNearest(element, temp_placesOfInterest);
+          //console.log("findNearest returned:", nearest);
+          that.addPlaceOfInterest(nearest, { onClick: that.onPlaceOfInterestClick });
+        });
     });
+
+  //console.log("placesOfInterest", that.placesOfInterest);
+
 }
 
 Map.prototype.onLocationFound = function(e){
