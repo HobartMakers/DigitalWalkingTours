@@ -6,6 +6,7 @@ import Map from './map/Map'
 import PLACE_TYPE from './map/PLACE_TYPE'
 import SideMenu from './modules/SideMenu'
 import FloatingButton from './modules/FloatingButton'
+var Urban_Art = require('./Urban_Art.json')
 
 const map = new Map
 
@@ -54,6 +55,7 @@ class App extends Component {
     map.load(this.mapEle_)
     this.updatePlacesOfInterest()
     //var mymap = window.L.map('map')
+
     
     return
     //.setView([-42.87, 147.25], 10);
@@ -71,9 +73,11 @@ class App extends Component {
 
     // Sets the map to the user's location
     mymap.locate({setView: true, maxZoom: 16});*/
+
   };
 
   updatePlacesOfInterest = () => {
+    /*
     var testData = [
       { title: 'Tasmanian Museum and Art Gallery',                      lat: -42.88147, long: 147.33265, type: PLACE_TYPE.MUSEUM},
       { title: 'The Henry Jones Art Hotel',                             lat: -42.88117, long: 147.3354,  type: PLACE_TYPE.MUSEUM },
@@ -83,6 +87,7 @@ class App extends Component {
       { title: 'St David\'s Cathedral',                                 lat: -42.88353, long: 147.32843, type: PLACE_TYPE.HERITAGE },
       { title: 'Treasury Building',                                     lat: -42.88389, long: 147.32927, type: PLACE_TYPE.HERITAGE },
     ]
+
     Promise.resolve(testData)
     .then(placesOfInterest => {
       placesOfInterest.forEach(p => 
@@ -92,6 +97,8 @@ class App extends Component {
         ).addTo(map.map)
       )
     })
+    */
+    window.L.geoJSON(Urban_Art).addTo(map.map);
   };
 
   state = {
