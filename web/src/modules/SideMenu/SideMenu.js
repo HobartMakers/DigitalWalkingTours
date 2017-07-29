@@ -13,7 +13,7 @@ const styles = {
     backgroundColor: 'white',
     top: 0,
     right: 0,
-    borderLeft: '1px solid #00addf',
+    borderLeft: '1px solid #dfdfdf',
     zIndex: 402,
     boxSizing: 'border-box',
   },

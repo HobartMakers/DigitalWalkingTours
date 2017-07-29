@@ -7,6 +7,7 @@ const styles = {
     padding: 10,
     position: 'relative',
     fontSize: 12,
+    color: '#76797b',
     '@global': {
       h2: {
         fontWeight: 'normal',

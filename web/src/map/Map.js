@@ -56,18 +56,24 @@ Map.prototype.load = function(container){
   this.map.on('locationerror', (e) => this.onLocationError(e));
   this.map.on('locationfound', (e) => this.onLocationFound(e));
 
-  this.map.locate({setView: true, maxZoom: 16,});
+  this.map.locate({setView: true, maxZoom: 16, watch: true});
 
   // Load tiles
-  this.layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+  /*this.layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
       'Imagery © <a href="http://mapbox.com">Mapbox</a>',
     id: 'mapbox.streets'
-  }).addTo(this.map);
-  this.layer.on('load', e => this.onLayerLoad(e))
+  }).addTo(this.map);*/
 
+  this.layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(this.map);
+
+  this.layer.on('load', e => this.onLayerLoad(e))
   window.L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(this.map);
@@ -311,6 +317,9 @@ Map.prototype.onLocationFound = function(e){
   var temp_dest = window.L.latLng(-42.855165, 147.297478);
   this.createRoute(location, temp_dest);*/
   this.startLocation = e.latlng; //{lat: e.latlng.lat, long: e.latlng.lng }
+  if (this.lastCircle)
+    this.lastCircle.remove()
+  this.lastCircle = L.circle(e.latlng, 5).addTo(this.map)
   this.maybeFinishLoading()
   //this.createTempRoute(location, temp_dest);
 }
