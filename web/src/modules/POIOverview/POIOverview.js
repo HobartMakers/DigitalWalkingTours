@@ -2,8 +2,9 @@ import React, { Component } from 'react'
 
 class POIOverview extends Component {
   render = () => {
-    const { images, content } = this.props
+    const { title, images, content } = this.props
     return <div>
+      <h2>{title}</h2>
       {formatImages(images)}
       {formatContent(content)}
     </div>
