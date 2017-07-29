@@ -100,7 +100,26 @@ class App extends Component {
     })
     */
     //window.L.geoJSON(Hobart_Facilities).addTo(map.map);
+
+    window.L.geoJSON(Urban_Art, {
+        style: function(feature) {
+            return {color: 'green'};
+        },
+        pointToLayer: function(feature, latlng) {
+            return new window.L.CircleMarker(latlng, {radius: 3, fillOpacity: 0.65});
+        },
+        onEachFeature: function (feature, layer) {
+            var info = "Artist: " + feature.properties.Artist + "<br />" +
+                       "Title: " + feature.properties.Title + "<br />" + 
+                       "Date: " + feature.properties.Date + "<br />"; 
+
+            layer.bindPopup(info);
+        }
+    }).addTo(map.map);
+
     //window.L.geoJSON(Urban_Art).addTo(map.map);
+
+
   };
 
   state = {
