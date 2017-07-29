@@ -9,7 +9,7 @@ const styles = {
     position: 'fixed',
     height: '100vh',
     overflowY: 'auto',
-    width: '40%',
+    width: '50%',
     backgroundColor: 'white',
     top: 0,
     right: 0,
@@ -27,16 +27,17 @@ class SideMenu extends Component {
       className, 
       poiImages,
       poiContent,
+      poiTitle,
       ...otherProps, 
     } = this.props
     return <div 
       {...otherProps}
       className={classNames(classes.sideMenu, className)}
     >
-      <Button>Art</Button>
+      {/*<Button>Art</Button>
       <Button>Heritage</Button>
-      <Button>Museums</Button>
-      <POIOverview images={poiImages} content={poiContent} />
+      <Button>Museums</Button>*/}
+      <POIOverview images={poiImages} content={poiContent} title={poiTitle} />
     </div>
   }
 }

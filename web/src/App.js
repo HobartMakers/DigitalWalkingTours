@@ -12,6 +12,8 @@ import iconFactory from './map/iconFactory'
 import 'leaflet-routing-machine';
 //var Urban_Art = require('./Urban_Art.json')
 //var Hobart_Facilities = require('./Hobart_Facilities.json')
+import Loader from './modules/Loader'
+import getPointsOfInterest from './xhr/getPointsOfInterest'
 
 const map = new Map
 
@@ -45,6 +47,7 @@ const styles = {
   mapContainer: {
     width: '100vw',
     height: '100vh',
+    transition: 'opacity 0.3s',
   },
   menuButton: {
     position: 'absolute',
@@ -55,18 +58,27 @@ const styles = {
   content: {
     position: 'relative',
   },
+  loading: {
+    position: 'fixed !important',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    textAlign: 'center',
+  },
 }
 
 class App extends Component {
 
   componentDidMount = () => {
+    map.on('load', () => this.setState({ initializing: false }))
     map.load(this.mapEle_)
     this.updatePlacesOfInterest()
   };
 
   updatePlacesOfInterest = () => {
     
-    var testData = [
+    /*var testData = [
       { 
         title: 'Tasmanian Museum and Art Gallery',                      
         lat: -42.88147, 
@@ -100,7 +112,7 @@ class App extends Component {
       placesOfInterest.forEach(p => {
         map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
       })
-    })
+    })*/
     
     //window.L.geoJSON(Hobart_Facilities).addTo(map.map);
 
@@ -136,8 +148,6 @@ class App extends Component {
     e.originalEvent.stopPropagation()
     this.setState({
       sideMenuOpen: true,
-      poiContent: poi.content,
-      poiImages: poi.images,
       selectedMarker: marker,
       selectedPoi: poi,
     })
@@ -153,6 +163,8 @@ class App extends Component {
 
   state = {
     sideMenuOpen: false,
+    initializing: true,
+    loading: false,
   };
 
   closeSideMenu = () => {
@@ -163,27 +175,43 @@ class App extends Component {
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
 
   startTour = () => {
-    var points = map.createRoute();
+    /*var points = map.createRoute();
 
     points.forEach(function(element) {
       console.log(element);
       window.L.marker(element).addTo(map.map)
-    });
+    });*/
+
+    this.setState({
+      loading: true,
+    })
+
+    
+    var startLoc = map.getStartLocation()
+
+    getPointsOfInterest(startLoc.lat, startLoc.long , 0.2)
+    .then(placesOfInterest => {
+      this.setState({ loading: false, })
+      placesOfInterest.forEach(p => {
+        map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
+      })
+    })
 
   }
 
   render() {
     const { classes } = this.props
-    const { sideMenuOpen, poiContent, poiImages } = this.state
-    
+    var { sideMenuOpen, selectedPoi, initializing, loading } = this.state
+    selectedPoi = selectedPoi || {}
+
     return <Motion 
       defaultStyle={{
-        menuX: 40,
+        menuX: 50,
         contentX: 0,
       }} 
       style={{
-        menuX: spring(sideMenuOpen ? 0 : 40),
-        contentX: spring(sideMenuOpen ? -20 : 0),
+        menuX: spring(sideMenuOpen ? 0 : 50),
+        contentX: spring(sideMenuOpen ? -25 : 0),
       }}
     >
       {value => <div className={classes.app}>
@@ -194,25 +222,34 @@ class App extends Component {
           <div 
             className={classes.mapContainer} 
             ref={el => this.mapEle_ = el} 
+            style={{opacity: initializing ? 0 : 1}}
           />
-          <div className={classes.buttonContainer}>
+          {initializing ? null : <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
-              <Button className={classes.startTourButton} onClick={this.startTour}>Start Tour</Button>
+              <Button 
+                className={classes.startTourButton} 
+                onClick={this.startTour}
+                disabled={loading}
+              >
+                {loading ? 'Retrieving...' : 'Start Tour'}
+              </Button>
             </div>
-          </div>
+          </div>}
         </div>
-        <FloatingButton className={classes.menuButton} onClick={this.toggleSideMenu}>
+        {initializing ? null : <FloatingButton className={classes.menuButton} onClick={this.toggleSideMenu}>
           <svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24">
             <path d="M0 0h24v24H0z" fill="none" />
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
           </svg>
-        </FloatingButton>
-        <SideMenu 
+        </FloatingButton>}
+        {initializing ? null : <SideMenu 
           open={sideMenuOpen} 
           style={{transform: `translateX(${value.menuX}vw)`}} 
-          poiContent={poiContent}
-          poiImages={poiImages}
-        />
+          poiTitle={selectedPoi.title}
+          poiContent={selectedPoi.contents}
+          poiImages={selectedPoi.images}
+        />}
+        {initializing ? <Loader className={classes.loading} /> : null}
       </div>}
     </Motion>
     
