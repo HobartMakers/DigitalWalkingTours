@@ -33,7 +33,7 @@ Map.prototype.findNearest = function(ideal_point, actual_points) {
     actual_points.forEach(function(point) {
         var this_distance = calcDistance(ideal_point['lat'], ideal_point['long'], point['lat'], point['long']);
 
-        if (this_disance) < nearest_distance) {
+        if ((this_distance) < nearest_distance) {
             nearest_distance = this_distance;
             nearest = point;
         }   
