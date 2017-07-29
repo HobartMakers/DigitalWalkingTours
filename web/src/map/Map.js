@@ -65,12 +65,17 @@ Map.prototype.load = function(container){
 
     this.manualStartLocation = e.latlng
 
-    if (this.startMarker)
+    if (this.startMarker){
       this.startMarker.remove()
+      var index = this.controls.indexOf(this.startMarker)
+      if (index != -1)
+        this.controls.splice(index, 1)
+    }
     this.startMarker = L.marker(
       e.latlng,
       markerOptions,
     ).addTo(this.map)
+    this.controls.push(this.startMarker)
     
   });
 
