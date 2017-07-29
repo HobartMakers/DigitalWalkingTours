@@ -1,6 +1,7 @@
 //import r360 from 'route360'
 import L from 'leaflet'
 import iconFactory from './iconFactory'
+import getPointsOfInterest from '../xhr/getPointsOfInterest';
 
 const ROUTE_360_API_KEY = '4UH6GBMYTDBEZSXZ6FUWL0E'
 const DEFAULT_LATLNG = window.L.latLng(-42.88234, 147.33047);
@@ -61,16 +62,16 @@ Map.prototype.getNextPoint = function(lat_lng, angle_deg, distance_km){
 
 
 Map.prototype.onLayerLoad = function(){
-  this.layerLoaded = true
-  this.maybeFinishLoading()
+  this.layerLoaded = true;
+  this.maybeFinishLoading();
 }
 
-Map.prototype.createRoute = function(container){
+Map.prototype.createRoute = function(duration){
     console.log("Creating route");
 
     var default_speed_km = 5.5;
     
-    var default_duration = 15;
+    var default_duration = duration;
 
     var total_dist_km = default_speed_km * (default_duration / 60);
 
@@ -141,6 +142,17 @@ Map.prototype.onLocationError = function(error){
   
   this.startLocation = defaultStartLocation
   this.maybeFinishLoading()
+}
+
+Map.prototype.generatePath = function(duration){
+  var points = this.createRoute(duration);
+  getPointsOfInterest(startLoc.lat, startLoc.long)
+    .then(placesOfInterest => {
+      this.setState({ loading: false, })
+      placesOfInterest.forEach(p => {
+        map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
+      })
+    })
 }
 
 Map.prototype.onLocationFound = function(e){
