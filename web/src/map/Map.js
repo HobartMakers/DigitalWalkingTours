@@ -182,72 +182,78 @@ Map.prototype.onLocationError = function(error){
 }
 
 Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesOfInterest, distance_km){
-  var points = this.createPoints(center_point, distance_km);
-  var nearest_points = [];
-  var nearestPlacesOfInterest = []
-    points.forEach((element) => {
-      //console.log(element);
-      //window.L.marker(element).addTo(that.map);
+  return new Promise((resolve, reject) => {
+    var points = this.createPoints(center_point, distance_km);
+    var nearest_points = [];
+    var nearestPlacesOfInterest = []
+      points.forEach((element) => {
+        //console.log(element);
+        //window.L.marker(element).addTo(that.map);
+      
+        //console.log("placesOfInterest:", temp_placesOfInterest);
     
-      //console.log("placesOfInterest:", temp_placesOfInterest);
-  
-      var nearest = this.findNearest(element, temp_placesOfInterest);
-      var nearest_latlng = window.L.latLng(nearest.lat, nearest.long);
-      nearest_points.push(nearest_latlng);
-      nearestPlacesOfInterest.push(nearest)
-      //console.log("findNearest returned:", nearest);
-      //that.addPlaceOfInterest(nearest);
-    });
+        var nearest = this.findNearest(element, temp_placesOfInterest);
+        var nearest_latlng = window.L.latLng(nearest.lat, nearest.long);
+        nearest_points.push(nearest_latlng);
+        nearestPlacesOfInterest.push(nearest)
+        //console.log("findNearest returned:", nearest);
+        //that.addPlaceOfInterest(nearest);
+      });
 
-    console.log(nearest_points);
-    //var first = nearest_points[0];
-    //nearest_points.push(first);
-    nearest_points.splice(0, 0, startLocation)
-    nearest_points.push(startLocation)
+      console.log(nearest_points);
+      //var first = nearest_points[0];
+      //nearest_points.push(first);
+      nearest_points.splice(0, 0, startLocation)
+      nearest_points.push(startLocation)
 
-    var router = L.Routing.mapbox(
-      'pk.eyJ1IjoiYWxseWN3IiwiYSI6ImNqNXA5ZDk4NTA4NTkyd211bTBvOGxpN28ifQ.mx0X6eehCGTmx9_ZBzPkSg',
-      {
-        profile: 'mapbox/walking',
-      }
-    )
-
-    var control = L.Routing.control({
-      //waypoints: nearest_points,
-      plan: L.Routing.plan(
-        nearest_points, 
+      
+      var router = L.Routing.mapbox(
+        'pk.eyJ1IjoiYWxseWN3IiwiYSI6ImNqNXA5ZDk4NTA4NTkyd211bTBvOGxpN28ifQ.mx0X6eehCGTmx9_ZBzPkSg',
         {
-          createMarker: function(i, wp) {
-            return L.marker(wp.latLng, {
-              draggable: false,
-              icon: iconFactory.createHiddenLeafletIcon(),
-            });
-          },
+          profile: 'mapbox/walking',
         }
-      ),
-      router: /*L.Routing.osrmv1({
-        allowUTurns: true,
-        geometryOnly: true
-      }),*/ router,
-      routeWhileDragging: true,
-      showAlternatives: false,
-      show: false,
-      collapsible: true,
-      useZoomParameter: true,
-      lineOptions: {
-        styles: [{color: '#00addf', opacity: 0.8, weight: 2}]
-      },
-    });
+      )
 
-    control.addTo(this.map);
-    this.controls.push(control)
+      var control = L.Routing.control({
+        //waypoints: nearest_points,
+        plan: L.Routing.plan(
+          nearest_points, 
+          {
+            createMarker: function(i, wp) {
+              return L.marker(wp.latLng, {
+                draggable: false,
+                icon: iconFactory.createHiddenLeafletIcon(),
+              });
+            },
+          }
+        ),
+        router: /*L.Routing.osrmv1({
+          allowUTurns: true,
+          geometryOnly: true
+        }),*/ router,
+        routeWhileDragging: true,
+        showAlternatives: false,
+        show: false,
+        collapsible: true,
+        useZoomParameter: true,
+        lineOptions: {
+          styles: [{color: '#00addf', opacity: 0.8, weight: 2}]
+        },
+      });
 
-    /*this.map.on('zoomend', function() {
-      control.route();
-    });*/
+      control.on('routesfound', resolve)
+      control.on('routingerror', reject)
 
-    // Must be done last else points of interest are not clickable
-    nearestPlacesOfInterest.forEach(p => this.addPlaceOfInterest(p))
+      control.addTo(this.map);
+      this.controls.push(control)
+
+      /*this.map.on('zoomend', function() {
+        control.route();
+      });*/
+
+      // Must be done last else points of interest are not clickable
+      nearestPlacesOfInterest.forEach(p => this.addPlaceOfInterest(p))
+  })
 }
 
 Map.prototype.generatePath = function(duration){

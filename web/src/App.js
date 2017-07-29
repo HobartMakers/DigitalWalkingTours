@@ -337,7 +337,7 @@ class App extends Component {
                 onClick={loading ? null : (inTour ? this.stopTour : this.startTour)}
                 disabled={loading}
               >
-                {loading ? 'Retrieving...' : (inTour ? 'Stop' : 'Start Tour')}
+                {loading ? 'Calculating...' : (inTour ? 'Stop' : 'Start Tour')}
               </Button>
             </div>
           </div>}
