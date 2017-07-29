@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
 import injectStyles from 'react-jss'
-import { Motion, spring } from 'react-motion'
 import Button from './../Button'
+import classNames from 'classnames'
+import POIOverview from './../POIOverview'
 
 const styles = {
   sideMenu: {
     position: 'fixed',
     height: '100vh',
     overflowY: 'auto',
-    width: 160,
+    width: '40%',
     backgroundColor: 'white',
     top: 0,
     right: 0,
@@ -21,25 +22,22 @@ const styles = {
 class SideMenu extends Component {
 
   render = () => {
-    const { classes, open } = this.props
-    console.log(open)
-    return <Motion 
-      defaultStyle={{
-        menuX: 160,
-      }} 
-      style={{
-        menuX: spring(open ? 0 : 160),
-      }}
+    const { 
+      classes, 
+      className, 
+      poiImages,
+      poiContent,
+      ...otherProps, 
+    } = this.props
+    return <div 
+      {...otherProps}
+      className={classNames(classes.sideMenu, className)}
     >
-      {value => <div 
-        className={classes.sideMenu}
-        style={{transform: `translateX(${value.menuX}px)`}} 
-      >
-        <Button>Art</Button>
-        <Button>Heritage</Button>
-        <Button>Museums</Button>
-      </div>}
-    </Motion>
+      <Button>Art</Button>
+      <Button>Heritage</Button>
+      <Button>Museums</Button>
+      <POIOverview images={poiImages} content={poiContent} />
+    </div>
   }
 }
 
