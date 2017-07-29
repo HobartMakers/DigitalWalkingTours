@@ -57,7 +57,7 @@ class App extends Component {
     this.updatePlacesOfInterest()
     //var mymap = window.L.map('map')
 
-    
+
     return
     //.setView([-42.87, 147.25], 10);
 
@@ -91,7 +91,7 @@ class App extends Component {
 
     Promise.resolve(testData)
     .then(placesOfInterest => {
-      placesOfInterest.forEach(p => 
+      placesOfInterest.forEach(p =>
         window.L.marker(
           [p.lat, p.long],
           { title: p.title, },
@@ -114,11 +114,11 @@ class App extends Component {
   startTour = () => {
     var points = map.createRoute();
 
-    points.forEach(function(element) { 
+    points.forEach(function(element) {
       console.log(element);
       window.L.marker(element).addTo(map.map)
     });
-    
+
   }
 
   render() {
@@ -127,9 +127,9 @@ class App extends Component {
     return (
       <div className={classes.app}>
         <div onClick={this.closeSideMenu}>
-          <div 
-            className={classes.mapContainer} 
-            ref={el => this.mapEle_ = el} 
+          <div
+            className={classes.mapContainer}
+            ref={el => this.mapEle_ = el}
           />
           <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
