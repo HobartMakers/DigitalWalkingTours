@@ -20,7 +20,7 @@ function calcDistance(lat_1, lon_1, lat_2, lon_2) {
     var lat_km_diff = (Math.abs(lat_2) - Math.abs(lat_1)) * lat_km_per_degree;
     var lon_km_diff = (Math.abs(lon_2) - Math.abs(lon_1)) * lon_km_per_degree;
 
-    km_diff = Math.sqrt(lat_km_diff**2 + lon_km_diff**2);
+    var km_diff = Math.sqrt(lat_km_diff**2 + lon_km_diff**2);
     
     return km_diff;
 }
@@ -38,7 +38,7 @@ Map.prototype.findNearest = function(ideal_point, actual_points) {
             nearest = point;
         }   
     });
-    return point;
+    return nearest;
 }
 
 Map.prototype.load = function(container){
@@ -167,7 +167,7 @@ Map.prototype.onLocationError = function(error){
 
   // Fall back to a default location of the Old Mercury Building
   var defaultStartLocation = { lat: -42.88234, long: 147.33047 }
-  this.map.setView(defaultStartLocation.lat, defaultStartLocation.long, 16)
+  this.map.setView([defaultStartLocation.lat, defaultStartLocation.long], 16)
   
   this.startLocation = defaultStartLocation
   this.maybeFinishLoading()
