@@ -1,11 +1,17 @@
+//import r360 from 'route360'
+import L from 'leaflet'
+import iconFactory from './iconFactory'
+
+const ROUTE_360_API_KEY = '4UH6GBMYTDBEZSXZ6FUWL0E'
 
 function Map(){
   this.placesOfInterest_ = []
+  this.iconFactory_ = iconFactory
   this.map = null;
 }
 
 Map.prototype.load = function(container){
-  this.map = window.L.map(container)
+  this.map = L.map(container)
 
   this.map.on('locationerror', (e) => this.onLocationError(e))
 
@@ -15,7 +21,7 @@ Map.prototype.load = function(container){
   this.map.locate({setView: true, maxZoom: 16,});
 
   // Load tiles
-  window.L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -86,21 +92,47 @@ Map.prototype.onLocationFound = function(e){
   window.L.circle(location, radius).addTo(this.map);
   console.log(location);
   var temp_dest = window.L.latLng(-42.855165, 147.297478);
-  this.createRoute(location, temp_dest);
+  this.createTempRoute(location, temp_dest);
 }
 
-Map.prototype.createRoute = function(start_latlng, dest_latlngs){
+Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
   var L = window.L;
   var map = this.map;
 
-  L.Routing.control({
+  var control = L.Routing.control({
     waypoints: [
         start_latlng,
         dest_latlngs
     ],
-    routeWhileDragging: true
-  }).addTo(map);
+    routeWhileDragging: true,
+    showAlternatives: false,
+    show: false,
+    collapsible: true,
+    useZoomParameter: true
+  });
+
+  control.addTo(map);
+
+  map.on('zoomend', function() {
+    control.route();
+  });
 }
 
+
+Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
+
+  var markerOptions = { title: placeOfInterest.title }
+  
+  markerOptions.icon = this.iconFactory_.createLeafletIcon(placeOfInterest.type)
+
+  var marker = L.marker(
+    [placeOfInterest.lat, placeOfInterest.long],
+    markerOptions,
+  ).addTo(this.map);
+  
+  if (options.onClick){
+    marker.on('click', (e) => options.onClick(e, placeOfInterest, marker))
+  }
+}
 
 export default Map
