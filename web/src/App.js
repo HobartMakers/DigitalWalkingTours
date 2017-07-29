@@ -6,9 +6,12 @@ import Map from './map/Map'
 import PLACE_TYPE from './map/PLACE_TYPE'
 import SideMenu from './modules/SideMenu'
 import FloatingButton from './modules/FloatingButton'
+import L from 'leaflet'
+import { Motion, spring } from 'react-motion'
+import iconFactory from './map/iconFactory'
 import 'leaflet-routing-machine';
-var Urban_Art = require('./Urban_Art.json')
-var Hobart_Facilities = require('./Hobart_Facilities.json')
+//var Urban_Art = require('./Urban_Art.json')
+//var Hobart_Facilities = require('./Hobart_Facilities.json')
 
 const map = new Map
 
@@ -49,6 +52,9 @@ const styles = {
     left: 60,
     zIndex: 401,
   },
+  content: {
+    position: 'relative',
+  },
 }
 
 class App extends Component {
@@ -56,34 +62,33 @@ class App extends Component {
   componentDidMount = () => {
     map.load(this.mapEle_)
     this.updatePlacesOfInterest()
-    //var mymap = window.L.map('map')
-
-
-    return
-    //.setView([-42.87, 147.25], 10);
-
-    /*window.L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-        maxZoom: 18,
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-            'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        id: 'mapbox.streets'
-    }).addTo(mymap)
-
-    // Test marker
-    var marker = window.L.marker([-42.87, 147.25]).addTo(mymap);
-
-    // Sets the map to the user's location
-    mymap.locate({setView: true, maxZoom: 16});*/
-
   };
 
   updatePlacesOfInterest = () => {
-    /*
+    
     var testData = [
-      { title: 'Tasmanian Museum and Art Gallery',                      lat: -42.88147, long: 147.33265, type: PLACE_TYPE.MUSEUM},
-      { title: 'The Henry Jones Art Hotel',                             lat: -42.88117, long: 147.3354,  type: PLACE_TYPE.MUSEUM },
-      { title: 'University of Tasmania, Tasmanian College of the Arts', lat: -42.88157, long: 147.33666, type: PLACE_TYPE.ART },
+      { 
+        title: 'Tasmanian Museum and Art Gallery',                      
+        lat: -42.88147, 
+        long: 147.33265, 
+        type: PLACE_TYPE.MUSEUM,
+        content: `The Tasmanian Museum and Art Gallery is a museum located in Hobart, Tasmania. The museum was established in 1846, by the Royal Society of Tasmania, the oldest Royal Society outside England. The TMAG receives 300,000 visitors annually.`,
+        images: [
+          'http://tmag.tas.gov.au/__data/assets/image/0009/78093/Exhibitions_-_Central_Gallery.jpg',
+        ],
+      },
+      { 
+        title: 'The Henry Jones Art Hotel',                             
+        lat: -42.88117, 
+        long: 147.3354,  
+        type: PLACE_TYPE.MUSEUM,
+      },
+      { 
+        title: 'University of Tasmania, Tasmanian College of the Arts', 
+        lat: -42.88157, 
+        long: 147.33666, 
+        type: PLACE_TYPE.ART, 
+      },
       { title: 'Town Hall',                                             lat: -42.88254, long: 147.33106, type: PLACE_TYPE.HERITAGE},
       { title: 'Mawson\'s Huts Replica Museum',                         lat: -42.88309, long: 147.33227, type: PLACE_TYPE.MUSEUM },
       { title: 'St David\'s Cathedral',                                 lat: -42.88353, long: 147.32843, type: PLACE_TYPE.HERITAGE },
@@ -92,17 +97,14 @@ class App extends Component {
 
     Promise.resolve(testData)
     .then(placesOfInterest => {
-      placesOfInterest.forEach(p =>
-        window.L.marker(
-          [p.lat, p.long],
-          { title: p.title, },
-        ).addTo(map.map)
-      )
+      placesOfInterest.forEach(p => {
+        map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
+      })
     })
-    */
+    
     //window.L.geoJSON(Hobart_Facilities).addTo(map.map);
 
-    window.L.geoJSON(Urban_Art, {
+    /*window.L.geoJSON(Urban_Art, {
         style: function(feature) {
             return {color: 'green'};
         },
@@ -116,18 +118,47 @@ class App extends Component {
 
             layer.bindPopup(info);
         }
-    }).addTo(map.map);
+    }).addTo(map.map);*/
 
     //window.L.geoJSON(Urban_Art).addTo(map.map);
 
 
   };
 
+  onPlaceOfInterestClick = (e, poi, marker) => {
+    
+    this.unselectMarker()
+
+    // Change the icon
+    var icon = iconFactory.createLeafletIcon(poi.type, {color: 'red'})
+    marker.setIcon(icon)
+    
+    e.originalEvent.stopPropagation()
+    this.setState({
+      sideMenuOpen: true,
+      poiContent: poi.content,
+      poiImages: poi.images,
+      selectedMarker: marker,
+      selectedPoi: poi,
+    })
+  };
+
+  unselectMarker = () => {
+    const { selectedMarker, selectedPoi } = this.state
+    if (!selectedMarker) return
+
+    var icon = iconFactory.createLeafletIcon(selectedPoi.type)
+    selectedMarker.setIcon(icon)
+  }
+
   state = {
     sideMenuOpen: false,
   };
 
-  closeSideMenu = () => this.setState({ sideMenuOpen: false });
+  closeSideMenu = () => {
+    this.unselectMarker()
+    this.setState({ sideMenuOpen: false })
+  };
 
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
 
@@ -143,13 +174,26 @@ class App extends Component {
 
   render() {
     const { classes } = this.props
-    const { sideMenuOpen } = this.state
-    return (
-      <div className={classes.app}>
-        <div onClick={this.closeSideMenu}>
-          <div
-            className={classes.mapContainer}
-            ref={el => this.mapEle_ = el}
+    const { sideMenuOpen, poiContent, poiImages } = this.state
+    
+    return <Motion 
+      defaultStyle={{
+        menuX: 40,
+        contentX: 0,
+      }} 
+      style={{
+        menuX: spring(sideMenuOpen ? 0 : 40),
+        contentX: spring(sideMenuOpen ? -20 : 0),
+      }}
+    >
+      {value => <div className={classes.app}>
+        <div onClick={this.closeSideMenu}
+          className={classes.content}
+          style={{transform: `translateX(${value.contentX}vw)`}} 
+        >
+          <div 
+            className={classes.mapContainer} 
+            ref={el => this.mapEle_ = el} 
           />
           <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
@@ -163,9 +207,15 @@ class App extends Component {
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
           </svg>
         </FloatingButton>
-        <SideMenu open={sideMenuOpen} />
-      </div>
-    );
+        <SideMenu 
+          open={sideMenuOpen} 
+          style={{transform: `translateX(${value.menuX}vw)`}} 
+          poiContent={poiContent}
+          poiImages={poiImages}
+        />
+      </div>}
+    </Motion>
+    
   }
 }
 
