@@ -92,10 +92,10 @@ Map.prototype.onLocationFound = function(e){
   window.L.circle(location, radius).addTo(this.map);
   console.log(location);
   var temp_dest = window.L.latLng(-42.855165, 147.297478);
-  this.createRoute(location, temp_dest);
+  this.createTempRoute(location, temp_dest);
 }
 
-Map.prototype.createRoute = function(start_latlng, dest_latlngs){
+Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
   var L = window.L;
   var map = this.map;
 
@@ -124,13 +124,11 @@ Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
   var markerOptions = { title: placeOfInterest.title }
   
   markerOptions.icon = this.iconFactory_.createLeafletIcon(placeOfInterest.type)
-  
-
 
   var marker = L.marker(
     [placeOfInterest.lat, placeOfInterest.long],
     markerOptions,
-  ).addTo(this.map)
+  ).addTo(this.map);
   
   if (options.onClick){
     marker.on('click', (e) => options.onClick(e, placeOfInterest, marker))
