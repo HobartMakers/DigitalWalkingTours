@@ -175,12 +175,16 @@ class App extends Component {
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
 
   startTour = () => {
-    var points = map.createRoute();
+    //var points = map.createRoute();
     var that = this;
 
     this.setState({
       loading: true,
     })
+
+    map.generatePath(40);
+
+    /*
 
     points.forEach(function(element) {
       console.log(element);
@@ -195,7 +199,7 @@ class App extends Component {
       placesOfInterest.forEach(p => {
         map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
       })
-    })
+    }) */
   }
 
   render() {

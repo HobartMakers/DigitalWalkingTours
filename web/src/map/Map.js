@@ -11,6 +11,7 @@ function Map(){
   this.map = null;
   this.myLocation = DEFAULT_LATLNG;
   this.handlers_ = {}
+  this.placesOfInterest = [];
 }
 
 function calcDistance(lat_1, lon_1, lat_2, lon_2) {
@@ -33,9 +34,7 @@ Map.prototype.findNearest = function(ideal_point, actual_points) {
 
     actual_points.forEach(function(point) {
         var this_distance = calcDistance(ideal_point['lat'], ideal_point['long'], point['lat'], point['long']);
-
-
-        if ((this_disance) < nearest_distance) {
+        if ((this_distance) < nearest_distance) {
             nearest_distance = this_distance;
             nearest = point;
         }   
@@ -74,12 +73,17 @@ Map.prototype.getNextPoint = function(lat_lng, angle_deg, distance_km){
   var s_lat = lat_lng.lat;
   var s_lon = lat_lng.lng;
 
+  console.log("latng: " , s_lat , " ", s_lon);
+
   var lat_km_per_degree = 110;
   var lon_km_per_degree = Math.cos(s_lat * (Math.PI / 180)) * lat_km_per_degree;
 
   // Now we know how many lat/lon degrees away represent distance_km at this point on the globe
   var lat_diff = distance_km / lat_km_per_degree;
   var lon_diff = distance_km / lon_km_per_degree;
+
+  console.log("Lat diff: " + lat_diff);
+  console.log("Lon diff: " + lon_diff);
 
   var deg_rad = angle_deg * (Math.PI / 180);
 
@@ -97,11 +101,10 @@ Map.prototype.onLayerLoad = function(){
   this.maybeFinishLoading();
 }
 
-Map.prototype.createRoute = function(container){
+Map.prototype.createRoute = function(duration){
     console.log("Creating route");
 
     var default_speed_km = 5.5;
-    
     var default_duration = duration;
 
     var total_dist_km = default_speed_km * (default_duration / 60);
@@ -164,6 +167,34 @@ Map.prototype.createRoute = function(container){
     return points;
 }
 
+Map.prototype.createPoints = function(center_point, distance_km){
+
+
+  
+  var lat_km_per_degree = 110;
+  var lon_km_per_degree = Math.cos(center_point.lat * (Math.PI / 180)) * lat_km_per_degree;
+
+  //var lat_diff = distance_km / lat_km_per_degree;
+  //var lon_diff = distance_km / lon_km_per_degree;
+
+  // FIXME: change points based on time or distance
+  var num_points = 8;
+  var delta_deg = 360/num_points;
+
+  var radius = distance_km / (2 * Math.PI);
+
+  var points = [];
+  points.push(center_point);
+
+  for(var i = 0; i < num_points; i++){
+    var tp = this.getNextPoint(center_point, delta_deg * i, radius);
+    points.push(tp);
+  }
+
+  return points;
+
+}
+
 Map.prototype.onLocationError = function(error){
   console.error(error)
 
@@ -176,14 +207,34 @@ Map.prototype.onLocationError = function(error){
 }
 
 Map.prototype.generatePath = function(duration){
+
+  console.log("Genrating path");
+
+  var distance_km = (duration * 5) / 60;
+  var radius = distance_km / (2 * Math.PI);
+
+  console.log("Radius: " + radius);
+
+  var center_point = this.getNextPoint(this.startLocation, 0, radius);
   var points = this.createRoute(duration);
-  getPointsOfInterest(startLoc.lat, startLoc.long)
+    
+  var that = this;
+
+  getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
     .then(placesOfInterest => {
-      this.setState({ loading: false, })
+      //this.setState({ loading: false, })
       placesOfInterest.forEach(p => {
-        map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
+        that.placesOfInterest.push(p);
+        //this.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
       })
     })
+
+  var points = this.createPoints(center_point, distance_km);
+  var that = this;
+  points.forEach(function(element) {
+      console.log(element);
+      window.L.marker(element).addTo(that.map);
+    });
 }
 
 Map.prototype.onLocationFound = function(e){
@@ -197,7 +248,7 @@ Map.prototype.onLocationFound = function(e){
   console.log(location);
   var temp_dest = window.L.latLng(-42.855165, 147.297478);
   this.createRoute(location, temp_dest);*/
-  this.startLocation = {lat: e.latlng.lat, long: e.latlng.lng }
+  this.startLocation = e.latlng; //{lat: e.latlng.lat, long: e.latlng.lng }
   this.maybeFinishLoading()
   //this.createTempRoute(location, temp_dest);
 }
