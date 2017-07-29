@@ -43,7 +43,7 @@ const styles = {
   startTourButton: {
     position: 'relative',
     margin: '0 auto',
-    top: -(48 + 20),
+    top: -82,
   },
   mapContainer: {
     width: '100vw',

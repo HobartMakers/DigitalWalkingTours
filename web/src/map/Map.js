@@ -265,8 +265,10 @@ Map.prototype.generatePath = function(duration){
         });
 
         console.log(nearest_points);
-        var first = nearest_points[0];
-        nearest_points.push(first);
+        //var first = nearest_points[0];
+        //nearest_points.push(first);
+        nearest_points.splice(0, 0, this.startLocation)
+        nearest_points.push(this.startLocation)
 
         var control = L.Routing.control({
           //waypoints: nearest_points,
@@ -289,7 +291,10 @@ Map.prototype.generatePath = function(duration){
           showAlternatives: false,
           show: false,
           collapsible: true,
-          useZoomParameter: true
+          useZoomParameter: true,
+          lineOptions: {
+            styles: [{color: '#00addf', opacity: 0.8, weight: 2}]
+          },
         });
 
         control.addTo(that.map);
