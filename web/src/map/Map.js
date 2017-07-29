@@ -101,10 +101,15 @@ Map.prototype.createRoute = function(start_latlng, dest_latlngs){
     routeWhileDragging: true,
     showAlternatives: false,
     show: false,
-    collapsible: true
+    collapsible: true,
+    useZoomParameter: true
   });
-  
+
   control.addTo(map);
+
+  map.on('zoomend', function() {
+    control.route();
+  });
 }
 
 
