@@ -242,6 +242,7 @@ Map.prototype.generatePath = function(duration){
     })
     .then(() => {
       var points = this.createPoints(center_point, distance_km);
+      var nearest_points = [];
       points.forEach(function(element) {
           //console.log(element);
           window.L.marker(element).addTo(that.map);
@@ -249,10 +250,25 @@ Map.prototype.generatePath = function(duration){
           //console.log("placesOfInterest:", temp_placesOfInterest);
      
           var nearest = that.findNearest(element, temp_placesOfInterest);
+          var nearest_latlng = window.L.latLng(nearest.lat, nearest.long);
+          nearest_points.push(nearest_latlng);
           //console.log("findNearest returned:", nearest);
           that.addPlaceOfInterest(nearest, { onClick: that.onPlaceOfInterestClick });
         });
-    });
+
+      console.log(nearest_points);
+
+      var control = L.Routing.control({
+        waypoints: nearest_points,
+        routeWhileDragging: true,
+        showAlternatives: false,
+        show: false,
+        collapsible: true,
+        useZoomParameter: true
+      });
+
+      control.addTo(that.map);
+      });
 
   //console.log("placesOfInterest", that.placesOfInterest);
 

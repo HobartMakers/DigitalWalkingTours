@@ -182,7 +182,7 @@ class App extends Component {
       loading: true,
     })
 
-    map.generatePath(40);
+    map.generatePath(20);
 
     /*
 
