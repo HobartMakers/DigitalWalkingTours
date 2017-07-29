@@ -8,6 +8,7 @@ import SideMenu from './modules/SideMenu'
 import FloatingButton from './modules/FloatingButton'
 import 'leaflet-routing-machine';
 var Urban_Art = require('./Urban_Art.json')
+var Hobart_Facilities = require('./Hobart_Facilities.json')
 
 const map = new Map
 
@@ -57,7 +58,7 @@ class App extends Component {
     this.updatePlacesOfInterest()
     //var mymap = window.L.map('map')
 
-    
+
     return
     //.setView([-42.87, 147.25], 10);
 
@@ -91,7 +92,7 @@ class App extends Component {
 
     Promise.resolve(testData)
     .then(placesOfInterest => {
-      placesOfInterest.forEach(p => 
+      placesOfInterest.forEach(p =>
         window.L.marker(
           [p.lat, p.long],
           { title: p.title, },
@@ -99,7 +100,8 @@ class App extends Component {
       )
     })
     */
-    window.L.geoJSON(Urban_Art).addTo(map.map);
+    //window.L.geoJSON(Hobart_Facilities).addTo(map.map);
+    //window.L.geoJSON(Urban_Art).addTo(map.map);
   };
 
   state = {
@@ -110,19 +112,29 @@ class App extends Component {
 
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
 
+  startTour = () => {
+    var points = map.createRoute();
+
+    points.forEach(function(element) {
+      console.log(element);
+      window.L.marker(element).addTo(map.map)
+    });
+
+  }
+
   render() {
     const { classes } = this.props
     const { sideMenuOpen } = this.state
     return (
       <div className={classes.app}>
         <div onClick={this.closeSideMenu}>
-          <div 
-            className={classes.mapContainer} 
-            ref={el => this.mapEle_ = el} 
+          <div
+            className={classes.mapContainer}
+            ref={el => this.mapEle_ = el}
           />
           <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
-              <Button className={classes.startTourButton}>Start Tour</Button>
+              <Button className={classes.startTourButton} onClick={this.startTour}>Start Tour</Button>
             </div>
           </div>
         </div>

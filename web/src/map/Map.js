@@ -29,6 +29,46 @@ Map.prototype.load = function(container){
 
 }
 
+Map.prototype.createRoute = function(container){
+    console.log("Creating route");
+
+    // Need current location
+    if ("geolocation" in navigator) {
+      console.log("geolocation is available");
+      navigator.geolocation.getCurrentPosition(function(position) {
+        // FIXME - doesn't work yet
+        console.log("Latitude: " +position.coords.latitude + " Longitude: " + position.coords.longitude);
+      });
+    } else {
+      console.log("geolocation IS NOT available");
+    }
+
+    // Pick a random point 0.5 km away (average person walks 6km/h, a square with 0.5km sides == a 2km/20min walk)
+    var distance_km = 0.5;
+
+    // FIXME - make this use geolocation
+    var current_lat = -42.88234;
+    var current_lon = 147.33047;
+
+    var lat_km_per_degree = 110;
+    var lon_km_per_degree = Math.cos(current_lat * (Math.PI / 180)) * lat_km_per_degree;
+
+
+    // Now we know how many lat/lon degrees away represent distance_km at this point on the globe
+    var lat_diff = distance_km / lat_km_per_degree;
+    var lon_diff = distance_km / lon_km_per_degree;
+
+    console.log(lat_km_per_degree);
+    console.log(lon_km_per_degree);
+
+    var point0 = [current_lat, current_lon];
+    var point1 = [current_lat, current_lon - lon_diff];
+    var point2 = [current_lat + lat_diff, current_lon - lon_diff];
+    var point3 = [current_lat + lat_diff, current_lon];
+
+    return [point0, point1, point2, point3];
+}
+
 Map.prototype.onLocationError = function(error){
   console.error(error)
 
