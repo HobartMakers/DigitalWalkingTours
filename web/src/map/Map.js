@@ -4,8 +4,6 @@ import iconFactory from './iconFactory'
 import getPointsOfInterest from '../xhr/getPointsOfInterest';
 
 const ROUTE_360_API_KEY = '4UH6GBMYTDBEZSXZ6FUWL0E'
-const lat_km_per_degree = 110;
-const lon_km_per_degree = Math.cos(current_lat * (Math.PI / 180)) * lat_km_per_degree;
 const DEFAULT_LATLNG = window.L.latLng(-42.88234, 147.33047);
 
 function Map(){
@@ -16,10 +14,14 @@ function Map(){
 }
 
 function calcDistance(lat_1, lon_1, lat_2, lon_2) {
+
+    var lat_km_per_degree = 110;
+    var lon_km_per_degree = Math.cos(lat_1 * (Math.PI / 180)) * lat_km_per_degree;
+
     var lat_km_diff = (Math.abs(lat_2) - Math.abs(lat_1)) * lat_km_per_degree;
     var lon_km_diff = (Math.abs(lon_2) - Math.abs(lon_1)) * lon_km_per_degree;
 
-    km_diff = Math.sqrt(lat_km_diff**2 + lon_km_diff**2);
+    var km_diff = Math.sqrt(lat_km_diff**2 + lon_km_diff**2);
     
     return km_diff;
 }
@@ -32,12 +34,13 @@ Map.prototype.findNearest = function(ideal_point, actual_points) {
     actual_points.forEach(function(point) {
         var this_distance = calcDistance(ideal_point['lat'], ideal_point['long'], point['lat'], point['long']);
 
+
         if ((this_disance) < nearest_distance) {
             nearest_distance = this_distance;
             nearest = point;
         }   
     });
-    return point;
+    return nearest;
 }
 
 Map.prototype.load = function(container){
@@ -67,6 +70,7 @@ Map.prototype.load = function(container){
 
 // Path finding - get next point in a circular polygon
 Map.prototype.getNextPoint = function(lat_lng, angle_deg, distance_km){
+
   var s_lat = lat_lng.lat;
   var s_lon = lat_lng.lng;
 
@@ -93,7 +97,7 @@ Map.prototype.onLayerLoad = function(){
   this.maybeFinishLoading();
 }
 
-Map.prototype.createRoute = function(duration){
+Map.prototype.createRoute = function(container){
     console.log("Creating route");
 
     var default_speed_km = 5.5;
@@ -120,6 +124,9 @@ Map.prototype.createRoute = function(duration){
     // FIXME - make this use geolocation
     var current_lat = -42.88234;
     var current_lon = 147.33047;
+  
+    var lat_km_per_degree = 110;
+    var lon_km_per_degree = Math.cos(current_lat * (Math.PI / 180)) * lat_km_per_degree;
 
     // Now we know how many lat/lon degrees away represent distance_km at this point on the globe
     var lat_diff = distance_km / lat_km_per_degree;
@@ -162,7 +169,7 @@ Map.prototype.onLocationError = function(error){
 
   // Fall back to a default location of the Old Mercury Building
   var defaultStartLocation = { lat: -42.88234, long: 147.33047 }
-  this.map.setView(defaultStartLocation.lat, defaultStartLocation.long, 16)
+  this.map.setView([defaultStartLocation.lat, defaultStartLocation.long], 16)
   
   this.startLocation = defaultStartLocation
   this.maybeFinishLoading()
