@@ -14,6 +14,7 @@ import 'leaflet-routing-machine';
 //var Hobart_Facilities = require('./Hobart_Facilities.json')
 import Loader from './modules/Loader'
 import getPointsOfInterest from './xhr/getPointsOfInterest'
+import RouteError from './map/RouteError'
 
 const map = new Map
 
@@ -67,7 +68,25 @@ const styles = {
     bottom: 0,
     textAlign: 'center',
   },
-  
+  error: {
+    border: '2px solid red',
+    color: 'red',
+    padding: '4px 20px',
+    backgroundColor: 'white',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    zIndex: 500,
+    boxSizing: 'border-box',
+  },
+  errorCloseButton: {
+    position: 'absolute',
+    top: 1,
+    right: 1,
+    color: 'red',
+    cursor: 'pointer',
+  },
 }
 
 const optionsMenuStyles = {
@@ -215,6 +234,16 @@ class App extends Component {
         inTour: true,
       })
     })
+    .catch(error => {
+      if (error instanceof RouteError){
+        this.setState({
+          errorMessage: error.message,
+          loading: false,
+        }) 
+      } else {
+        throw error
+      }
+    })
 
     /*
 
@@ -239,10 +268,22 @@ class App extends Component {
     this.setState({ inTour: false, })
   };
 
+  closeError = () => this.setState({errorMessage: null});
+
   render() {
     const { classes } = this.props
-    var { sideMenuOpen, selectedPoi, initializing, loading, optionsOpen, inTour } = this.state
+    var { 
+      sideMenuOpen, 
+      selectedPoi, 
+      initializing, 
+      loading,
+      optionsOpen, 
+      inTour,
+      errorMessage, 
+    } = this.state
     selectedPoi = selectedPoi || {}
+
+    console.log(errorMessage)
 
     return <Motion 
       defaultStyle={{
@@ -257,6 +298,17 @@ class App extends Component {
       }}
     >
       {value => <div className={classes.app}>
+        {errorMessage ? <div className={classes.error}>
+          {errorMessage}
+          <div className={classes.errorCloseButton}
+            onClick={this.closeError}
+          >
+            <svg fill="red" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          </div>
+        </div> : null}
         <div onClick={this.closeSideMenu}
           className={classes.content}
           style={{transform: `translateX(${value.contentX}vw)`}} 

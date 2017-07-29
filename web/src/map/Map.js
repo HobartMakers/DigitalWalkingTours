@@ -2,9 +2,11 @@
 import L from 'leaflet'
 import iconFactory from './iconFactory'
 import getPointsOfInterest from '../xhr/getPointsOfInterest';
+import RouteError from './RouteError'
 
 const ROUTE_360_API_KEY = '4UH6GBMYTDBEZSXZ6FUWL0E'
 const DEFAULT_LATLNG = window.L.latLng(-42.88234, 147.33047);
+
 
 function Map(){
   this.iconFactory_ = iconFactory
@@ -260,6 +262,8 @@ Map.prototype.generatePath = function(duration){
   return getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
   .then(placesOfInterest => {
     //this.setState({ loading: false, })
+    if (placesOfInterest.length < 2)
+      throw new RouteError(`Not enough places of interest. Try dropping a pin somewhere else, for example, Hobart.`)
     return this.generatePath_(startLocation, center_point, placesOfInterest, distance_km)
   })
   //console.log("placesOfInterest", that.placesOfInterest);
