@@ -176,26 +176,35 @@ class App extends Component {
 
   startTour = () => {
     var points = map.createRoute();
-
-    points.forEach(function(element) {
-      console.log(element);
-      window.L.marker(element).addTo(map.map)
-    });
+    var that = this;
 
     this.setState({
       loading: true,
     })
-    
-    var startLoc = map.getStartLocation()
 
+    points.forEach(function(element) {
+      console.log(element);
+      window.L.marker(element).addTo(map.map);
+
+      getPointsOfInterest(element.lat, element.long , 0.2)
+        .then(placesOfInterest => {
+          that.setState({ loading: false, });
+          placesOfInterest.forEach(p => {
+            map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
+          })
+        })
+    });
+
+    var startLoc = map.getStartLocation();
+
+    /*
     getPointsOfInterest(startLoc.lat, startLoc.long , 0.2)
     .then(placesOfInterest => {
       this.setState({ loading: false, })
       placesOfInterest.forEach(p => {
         map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
       })
-    })
-
+    }) */
   }
 
   render() {

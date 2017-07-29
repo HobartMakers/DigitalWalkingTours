@@ -64,6 +64,7 @@ Map.prototype.onLayerLoad = function(){
   this.layerLoaded = true
   this.maybeFinishLoading()
 }
+
 Map.prototype.createRoute = function(container){
     console.log("Creating route");
 
