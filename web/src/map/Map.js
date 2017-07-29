@@ -93,13 +93,18 @@ Map.prototype.createRoute = function(start_latlng, dest_latlngs){
   var L = window.L;
   var map = this.map;
 
-  L.Routing.control({
+  var control = L.Routing.control({
     waypoints: [
         start_latlng,
         dest_latlngs
     ],
-    routeWhileDragging: true
-  }).addTo(map);
+    routeWhileDragging: true,
+    showAlternatives: false,
+    show: false,
+    collapsible: true
+  });
+  
+  control.addTo(map);
 }
 
 

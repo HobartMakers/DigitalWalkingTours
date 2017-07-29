@@ -3,3 +3,7 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.leaflet-control-container .leaflet-routing-container-hide {
+    display: none;
+}
