@@ -11,7 +11,7 @@ function Map(){
   this.map = null;
   this.myLocation = DEFAULT_LATLNG;
   this.handlers_ = {}
-  this.placesOfInterest = [];
+  this.controls = [];
 }
 
 function calcDistance(lat_1, lon_1, lat_2, lon_2) {
@@ -57,17 +57,19 @@ Map.prototype.load = function(container){
   this.map.on('locationfound', (e) => this.onLocationFound(e));
   this.map.on('contextmenu', (e) => {
     //do something ...
-    debugger
-
+    
     var markerOptions = { title: 'Start Location' }
     markerOptions.icon = this.iconFactory_.createLeafletIcon('startLocation')
 
     this.manualStartLocation = e.latlng
 
-    var marker = L.marker(
+    if (this.startMarker)
+      this.startMarker.remove()
+    this.startMarker = L.marker(
       e.latlng,
       markerOptions,
     ).addTo(this.map)
+    
   });
 
   this.map.locate({setView: true, watch: true});
@@ -88,6 +90,8 @@ Map.prototype.load = function(container){
   }).addTo(this.map);
 
   this.layer.on('load', e => this.onLayerLoad(e))
+
+  
   /*window.L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(this.map);*/
@@ -141,7 +145,7 @@ Map.prototype.createRoute = function(duration){
 
     //console.log("Total dist = " + total_dist_km + "km.");
     // Need current location
-    if ("geolocation" in navigator) {
+    /*if ("geolocation" in navigator) {
       console.log("geolocation is available");
       navigator.geolocation.getCurrentPosition(function(position) {
         // FIXME - doesn't work yet
@@ -149,7 +153,7 @@ Map.prototype.createRoute = function(duration){
       });
     } else {
       console.log("geolocation IS NOT available");
-    }
+    }*/
 
     // Pick a random point 0.5 km away (average person walks 6km/h, a square with 0.5km sides == a 2km/20min walk)
     var distance_km = 0.5;
@@ -236,6 +240,75 @@ Map.prototype.onLocationError = function(error){
   this.maybeFinishLoading()
 }
 
+Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesOfInterest, distance_km){
+  var points = this.createPoints(center_point, distance_km);
+  var nearest_points = [];
+  var nearestPlacesOfInterest = []
+    points.forEach((element) => {
+      //console.log(element);
+      //window.L.marker(element).addTo(that.map);
+    
+      //console.log("placesOfInterest:", temp_placesOfInterest);
+  
+      var nearest = this.findNearest(element, temp_placesOfInterest);
+      var nearest_latlng = window.L.latLng(nearest.lat, nearest.long);
+      nearest_points.push(nearest_latlng);
+      nearestPlacesOfInterest.push(nearest)
+      //console.log("findNearest returned:", nearest);
+      //that.addPlaceOfInterest(nearest);
+    });
+
+    console.log(nearest_points);
+    //var first = nearest_points[0];
+    //nearest_points.push(first);
+    nearest_points.splice(0, 0, startLocation)
+    nearest_points.push(startLocation)
+
+    var router = L.Routing.mapbox(
+      'pk.eyJ1IjoiYWxseWN3IiwiYSI6ImNqNXA5ZDk4NTA4NTkyd211bTBvOGxpN28ifQ.mx0X6eehCGTmx9_ZBzPkSg',
+      {
+        profile: 'mapbox/walking',
+      }
+    )
+
+    var control = L.Routing.control({
+      //waypoints: nearest_points,
+      plan: L.Routing.plan(
+        nearest_points, 
+        {
+          createMarker: function(i, wp) {
+            return L.marker(wp.latLng, {
+              draggable: false,
+              icon: iconFactory.createHiddenLeafletIcon(),
+            });
+          },
+        }
+      ),
+      router: /*L.Routing.osrmv1({
+        allowUTurns: true,
+        geometryOnly: true
+      }),*/ router,
+      routeWhileDragging: true,
+      showAlternatives: false,
+      show: false,
+      collapsible: true,
+      useZoomParameter: true,
+      lineOptions: {
+        styles: [{color: '#00addf', opacity: 0.8, weight: 2}]
+      },
+    });
+
+    control.addTo(this.map);
+    this.controls.push(control)
+
+    /*this.map.on('zoomend', function() {
+      control.route();
+    });*/
+
+    // Must be done last else points of interest are not clickable
+    nearestPlacesOfInterest.forEach(p => this.addPlaceOfInterest(p))
+}
+
 Map.prototype.generatePath = function(duration){
 
   console.log("Generating path");
@@ -249,79 +322,12 @@ Map.prototype.generatePath = function(duration){
 
   var center_point = this.getNextPoint(startLocation, 0, radius);
   var points = this.createRoute(duration);
-    
-  var that = this;
-
-  var temp_placesOfInterest = [];
 
   return getPointsOfInterest(center_point.lat, center_point.lng, radius * 1.5)
-    .then(placesOfInterest => {
-      //this.setState({ loading: false, })
-      placesOfInterest.forEach(p => {
-        temp_placesOfInterest.push(p);
-        //this.addPlaceOfInterest(p)
-      })
-    })
-    .then(() => {
-      var points = this.createPoints(center_point, distance_km);
-      var nearest_points = [];
-      var nearestPlacesOfInterest = []
-        points.forEach(function(element) {
-          //console.log(element);
-          //window.L.marker(element).addTo(that.map);
-       
-          //console.log("placesOfInterest:", temp_placesOfInterest);
-     
-          var nearest = that.findNearest(element, temp_placesOfInterest);
-          var nearest_latlng = window.L.latLng(nearest.lat, nearest.long);
-          nearest_points.push(nearest_latlng);
-          nearestPlacesOfInterest.push(nearest)
-          //console.log("findNearest returned:", nearest);
-          //that.addPlaceOfInterest(nearest);
-        });
-
-        console.log(nearest_points);
-        //var first = nearest_points[0];
-        //nearest_points.push(first);
-        nearest_points.splice(0, 0, startLocation)
-        nearest_points.push(startLocation)
-
-        var control = L.Routing.control({
-          //waypoints: nearest_points,
-          plan: L.Routing.plan(
-            nearest_points, 
-            {
-              createMarker: function(i, wp) {
-                return L.marker(wp.latLng, {
-                  draggable: false,
-                  icon: iconFactory.createHiddenLeafletIcon(),
-                });
-              },
-            }
-          ),
-          router: /*L.Routing.osrmv1({
-            allowUTurns: true,
-            geometryOnly: true
-          }),*/ L.Routing.mapbox('pk.eyJ1IjoiYWxseWN3IiwiYSI6ImNqNXA5ZDk4NTA4NTkyd211bTBvOGxpN28ifQ.mx0X6eehCGTmx9_ZBzPkSg'),
-          routeWhileDragging: true,
-          showAlternatives: false,
-          show: false,
-          collapsible: true,
-          useZoomParameter: true,
-          lineOptions: {
-            styles: [{color: '#00addf', opacity: 0.8, weight: 2}]
-          },
-        });
-
-        control.addTo(that.map);
-
-        that.map.on('zoomend', function() {
-          control.route();
-        });
-
-        nearestPlacesOfInterest.forEach(p => that.addPlaceOfInterest(p))
-      });
-
+  .then(placesOfInterest => {
+    //this.setState({ loading: false, })
+    return this.generatePath_(startLocation, center_point, placesOfInterest, distance_km)
+  })
   //console.log("placesOfInterest", that.placesOfInterest);
 
 }
@@ -346,7 +352,9 @@ Map.prototype.onLocationFound = function(e){
 }
 
 Map.prototype.maybeFinishLoading = function(){
+  if (this.loaded) return
   if (!this.layerLoaded || !this.startLocation) return
+  this.loaded = true
   ;(this.handlers_['load'] || []).forEach(handler => handler())
 }
 
@@ -409,7 +417,13 @@ Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
       func(e, placeOfInterest, marker)
     )
   })
+  this.controls.push(marker)
   
 }
+
+Map.prototype.clear = function(){
+  this.controls.forEach(c => c.remove())
+}
+
 
 export default Map

@@ -235,7 +235,8 @@ class App extends Component {
   }
 
   stopTour = () => {
-    
+    map.clear()
+    this.setState({ inTour: false, })
   };
 
   render() {
@@ -251,21 +252,21 @@ class App extends Component {
       }} 
       style={{
         menuX: spring(sideMenuOpen ? 0 : 50),
-        contentX: spring(sideMenuOpen ? -25 : (optionsOpen ? -40 : 0)),
+        contentX: spring(sideMenuOpen ? -25 : 0),
         optionsMenuX: spring(optionsOpen ? 0 : 80),
       }}
     >
       {value => <div className={classes.app}>
         <div onClick={this.closeSideMenu}
           className={classes.content}
-          style={{transform: `translateX(${value.contentX}${sideMenuOpen ? 'vw' : 'px'})`}} 
+          style={{transform: `translateX(${value.contentX}vw)`}} 
         >
           <div 
             className={classes.mapContainer} 
             ref={el => this.mapEle_ = el} 
             style={{opacity: initializing ? 0 : 1}}
           />
-          {(initializing || inTour) ? null : <div className={classes.buttonContainer}>
+          {(initializing) ? null : <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
               <Button 
                 className={classes.startTourButton} 
