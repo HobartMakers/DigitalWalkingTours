@@ -9,6 +9,9 @@ import FloatingButton from './modules/FloatingButton'
 import L from 'leaflet'
 import { Motion, spring } from 'react-motion'
 import iconFactory from './map/iconFactory'
+import 'leaflet-routing-machine';
+//var Urban_Art = require('./Urban_Art.json')
+//var Hobart_Facilities = require('./Hobart_Facilities.json')
 
 const map = new Map
 
@@ -59,12 +62,10 @@ class App extends Component {
   componentDidMount = () => {
     map.load(this.mapEle_)
     this.updatePlacesOfInterest()
-    //var mymap = window.L.map('map')
-    
-    //map.loadRouting()
   };
 
   updatePlacesOfInterest = () => {
+    
     var testData = [
       { 
         title: 'Tasmanian Museum and Art Gallery',                      
@@ -93,12 +94,35 @@ class App extends Component {
       { title: 'St David\'s Cathedral',                                 lat: -42.88353, long: 147.32843, type: PLACE_TYPE.HERITAGE },
       { title: 'Treasury Building',                                     lat: -42.88389, long: 147.32927, type: PLACE_TYPE.HERITAGE },
     ]
+
     Promise.resolve(testData)
     .then(placesOfInterest => {
       placesOfInterest.forEach(p => {
         map.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
       })
     })
+    
+    //window.L.geoJSON(Hobart_Facilities).addTo(map.map);
+
+    /*window.L.geoJSON(Urban_Art, {
+        style: function(feature) {
+            return {color: 'green'};
+        },
+        pointToLayer: function(feature, latlng) {
+            return new window.L.CircleMarker(latlng, {radius: 3, fillOpacity: 0.65});
+        },
+        onEachFeature: function (feature, layer) {
+            var info = "Artist: " + feature.properties.Artist + "<br />" +
+                       "Title: " + feature.properties.Title + "<br />" + 
+                       "Date: " + feature.properties.Date + "<br />"; 
+
+            layer.bindPopup(info);
+        }
+    }).addTo(map.map);*/
+
+    //window.L.geoJSON(Urban_Art).addTo(map.map);
+
+
   };
 
   onPlaceOfInterestClick = (e, poi, marker) => {
@@ -138,6 +162,16 @@ class App extends Component {
 
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
 
+  startTour = () => {
+    var points = map.createRoute();
+
+    points.forEach(function(element) {
+      console.log(element);
+      window.L.marker(element).addTo(map.map)
+    });
+
+  }
+
   render() {
     const { classes } = this.props
     const { sideMenuOpen, poiContent, poiImages } = this.state
@@ -163,7 +197,7 @@ class App extends Component {
           />
           <div className={classes.buttonContainer}>
             <div className={classes.buttonContainerInner}>
-              <Button className={classes.startTourButton}>Start Tour</Button>
+              <Button className={classes.startTourButton} onClick={this.startTour}>Start Tour</Button>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ const ROUTE_360_API_KEY = '4UH6GBMYTDBEZSXZ6FUWL0E'
 function Map(){
   this.placesOfInterest_ = []
   this.iconFactory_ = iconFactory
+  this.map = null;
 }
 
 Map.prototype.load = function(container){
@@ -14,8 +15,10 @@ Map.prototype.load = function(container){
 
   this.map.on('locationerror', (e) => this.onLocationError(e))
 
+  this.map.on('locationfound', (e) => this.onLocationFound(e));
+  //map.on('locationerror', that.onLocationError);
 
-  this.map.locate({setView: true, maxZoom: 16,})
+  this.map.locate({setView: true, maxZoom: 16,});
 
   // Load tiles
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -24,72 +27,92 @@ Map.prototype.load = function(container){
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
       'Imagery © <a href="http://mapbox.com">Mapbox</a>',
     id: 'mapbox.streets'
-  }).addTo(this.map)
+  }).addTo(this.map);
+
+  window.L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(this.map);
+
+}
+
+Map.prototype.createRoute = function(container){
+    console.log("Creating route");
+
+    // Need current location
+    if ("geolocation" in navigator) {
+      console.log("geolocation is available");
+      navigator.geolocation.getCurrentPosition(function(position) {
+        // FIXME - doesn't work yet
+        console.log("Latitude: " +position.coords.latitude + " Longitude: " + position.coords.longitude);
+      });
+    } else {
+      console.log("geolocation IS NOT available");
+    }
+
+    // Pick a random point 0.5 km away (average person walks 6km/h, a square with 0.5km sides == a 2km/20min walk)
+    var distance_km = 0.5;
+
+    // FIXME - make this use geolocation
+    var current_lat = -42.88234;
+    var current_lon = 147.33047;
+
+    var lat_km_per_degree = 110;
+    var lon_km_per_degree = Math.cos(current_lat * (Math.PI / 180)) * lat_km_per_degree;
+
+
+    // Now we know how many lat/lon degrees away represent distance_km at this point on the globe
+    var lat_diff = distance_km / lat_km_per_degree;
+    var lon_diff = distance_km / lon_km_per_degree;
+
+    console.log(lat_km_per_degree);
+    console.log(lon_km_per_degree);
+
+    var point0 = [current_lat, current_lon];
+    var point1 = [current_lat, current_lon - lon_diff];
+    var point2 = [current_lat + lat_diff, current_lon - lon_diff];
+    var point3 = [current_lat + lat_diff, current_lon];
+
+    return [point0, point1, point2, point3];
 }
 
 Map.prototype.onLocationError = function(error){
   console.error(error)
 
   // Fall back to a default location of the Old Mercury Building
-  this.map.setView([-42.88234, 147.33047], 16)
+  this.map.setView([-42.88234, 147.33047], 16);
 }
 
-// Route360 test code
-/*Map.prototype.loadRouting = function(){
+Map.prototype.onLocationFound = function(e){
+  var radius = e.accuracy / 2;
+  var location = e.latlng;
 
-  // initialise the base map
-  //r360.basemap({ style: 'basic', apikey: ROUTE_360_API_KEY }).addTo(this.map)
+  var map = this.map;
 
-  // create a target marker icon to be able to distingush source and targets
-  var redIcon = L.icon({
-    iconUrl: 'http://assets.route360.net/leaflet-extras/marker-icon-red.png',
-    shadowUrl: 'http://assets.route360.net/leaflet-extras/marker-shadow.png',
-    iconAnchor: [12, 45],
-    popupAnchor: [0, -35]
+  window.L.marker(location).addTo(this.map);
+  window.L.circle(location, radius).addTo(this.map);
+  console.log(location);
+  var temp_dest = window.L.latLng(-42.855165, 147.297478);
+  this.createRoute(location, temp_dest);
+}
+
+Map.prototype.createRoute = function(start_latlng, dest_latlngs){
+  var L = window.L;
+  var map = this.map;
+
+  var control = L.Routing.control({
+    waypoints: [
+        start_latlng,
+        dest_latlngs
+    ],
+    routeWhileDragging: true,
+    showAlternatives: false,
+    show: false,
+    collapsible: true
   });
+  
+  control.addTo(map);
+}
 
-  // create a source and a two target markers and add them to the map
-  var sourceMarker1 = L.marker([-42.88147, 147.33265], { draggable : true }).addTo(this.map);
-  var targetMarker1 = L.marker([-42.88117, 147.3354], { icon: redIcon, draggable : true }).addTo(this.map);
-  var targetMarker2 = L.marker([-42.88157, 147.33666], { icon: redIcon, draggable : true }).addTo(this.map);
-
-
-  var routeLayer = L.featureGroup().addTo(this.map)
-
-  var getRoutes = function() {
-
-    routeLayer.clearLayers();
-
-    // you need to define some options for the polygon service
-    // for more travel options check out the other tutorials
-    var travelOptions = r360.travelOptions();
-    // we only have one source which is the marker we just added
-    travelOptions.addSource(sourceMarker1);
-    // add two targets to the options
-    travelOptions.addTarget(targetMarker1);
-    travelOptions.addTarget(targetMarker2);
-    // set the travel type to transit
-    travelOptions.setTravelType('transit');
-    // no alternative route recommendations - this is for pro/advanced plans only
-    travelOptions.setRecommendations(-1);
-    // please contact us and request your own key
-    travelOptions.setServiceKey(ROUTE_360_API_KEY);
-    // set the service url for your area
-    //travelOptions.setServiceUrl('https://service.route360.net/germany/');
-
-    // start the service
-    r360.RouteService.getRoutes(travelOptions, function(routes) {
-
-      // one route for each source and target combination
-      routes.forEach(function(route) {
-
-        r360.LeafletUtil.fadeIn(routeLayer, route, 1000, "travelDistance");
-      });
-    });
-  }
-
-  getRoutes()
-}*/
 
 Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
 
