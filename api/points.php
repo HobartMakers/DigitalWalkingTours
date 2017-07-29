@@ -59,7 +59,7 @@ foreach ($hobart_facilities['features'] as $f) {
 
     $feature['contents'] = "";
     $feature['images'] = [];
-    $feature['distance'] = distance($x, $y, $feature['lat'], $feature['lon']);
+    $feature['distance'] = distance($x, $y, $feature['lat'], $feature['long']);
     
     $features[] = $feature;
 }
@@ -79,7 +79,7 @@ foreach ($urban_art['features'] as $f) {
     $id = $f['properties']['OBJECTID'];
     //$feature['images'] = $f['properties']['URL_1'];
     $feature['images'] = ["https://tascode.com/govhack2017/images/urban-art-$id.jpg"];
-    $feature['distance'] = distance($x, $y, $feature['lat'], $feature['lon']);
+    $feature['distance'] = distance($x, $y, $feature['lat'], $feature['long']);
 
     //print_r($feature);
     $features[] = $feature;
