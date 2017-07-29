@@ -188,7 +188,7 @@ Map.prototype.createPoints = function(center_point, distance_km){
   //var lon_diff = distance_km / lon_km_per_degree;
 
   // FIXME: change points based on time or distance
-  var num_points = 8;
+  var num_points = 5;
   var delta_deg = 360/num_points;
 
   var radius = distance_km / (2 * Math.PI);
@@ -245,7 +245,7 @@ Map.prototype.generatePath = function(duration){
       var nearest_points = [];
       points.forEach(function(element) {
           //console.log(element);
-          window.L.marker(element).addTo(that.map);
+          //window.L.marker(element).addTo(that.map);
        
           //console.log("placesOfInterest:", temp_placesOfInterest);
      
@@ -256,18 +256,28 @@ Map.prototype.generatePath = function(duration){
           that.addPlaceOfInterest(nearest, { onClick: that.onPlaceOfInterestClick });
         });
 
-      console.log(nearest_points);
+        console.log(nearest_points);
+        var first = nearest_points[0];
+        nearest_points.push(first);
 
-      var control = L.Routing.control({
-        waypoints: nearest_points,
-        routeWhileDragging: true,
-        showAlternatives: false,
-        show: false,
-        collapsible: true,
-        useZoomParameter: true
-      });
+        var control = L.Routing.control({
+          waypoints: nearest_points,
+          router: L.Routing.osrmv1({
+            allowUTurns: true,
+            geometryOnly: true
+          }),
+          routeWhileDragging: true,
+          showAlternatives: false,
+          show: false,
+          collapsible: true,
+          useZoomParameter: true
+        });
 
-      control.addTo(that.map);
+        control.addTo(that.map);
+
+        that.map.on('zoomend', function() {
+          control.route();
+        });
       });
 
   //console.log("placesOfInterest", that.placesOfInterest);
