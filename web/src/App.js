@@ -73,6 +73,7 @@ class App extends Component {
 
   componentDidMount = () => {
     map.on('load', () => this.setState({ initializing: false }))
+    map.on('placeOfInterestClick', (e, poi, marker) => this.onPlaceOfInterestClick(e, poi, marker))
     map.load(this.mapEle_)
     this.updatePlacesOfInterest()
   };
@@ -199,7 +200,7 @@ class App extends Component {
 
     var startLoc = map.getStartLocation();
 
-    getPointsOfInterest(startLoc.lat, startLoc.long , 0.2)
+    getPointsOfInterest(startLoc.lat, startLoc.lng , 0.2)
     .then(placesOfInterest => {
       this.setState({ loading: false, })
       placesOfInterest.forEach(p => {

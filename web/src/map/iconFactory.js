@@ -61,6 +61,7 @@ IconFactory.prototype.createSvgIcon = function(type, iconOptions = {}){
     width={width} 
     height={height} 
     fill={color} 
+    zIndex={1000} // To put above any routing elements
   />, div)
   return div
 }

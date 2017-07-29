@@ -209,8 +209,8 @@ Map.prototype.onLocationError = function(error){
   console.error(error)
 
   // Fall back to a default location of the Old Mercury Building
-  var defaultStartLocation = { lat: -42.88234, long: 147.33047 }
-  this.map.setView([defaultStartLocation.lat, defaultStartLocation.long], 16)
+  var defaultStartLocation = { lat: -42.88234, lng: 147.33047 }
+  this.map.setView([defaultStartLocation.lat, defaultStartLocation.lng], 16)
   
   this.startLocation = defaultStartLocation
   this.maybeFinishLoading()
@@ -237,13 +237,14 @@ Map.prototype.generatePath = function(duration){
       //this.setState({ loading: false, })
       placesOfInterest.forEach(p => {
         temp_placesOfInterest.push(p);
-        //this.addPlaceOfInterest(p, { onClick: this.onPlaceOfInterestClick })
+        //this.addPlaceOfInterest(p)
       })
     })
     .then(() => {
       var points = this.createPoints(center_point, distance_km);
       var nearest_points = [];
-      points.forEach(function(element) {
+      var nearestPlacesOfInterest = []
+        points.forEach(function(element) {
           //console.log(element);
           //window.L.marker(element).addTo(that.map);
        
@@ -252,8 +253,9 @@ Map.prototype.generatePath = function(duration){
           var nearest = that.findNearest(element, temp_placesOfInterest);
           var nearest_latlng = window.L.latLng(nearest.lat, nearest.long);
           nearest_points.push(nearest_latlng);
+          nearestPlacesOfInterest.push(nearest)
           //console.log("findNearest returned:", nearest);
-          that.addPlaceOfInterest(nearest, { onClick: that.onPlaceOfInterestClick });
+          //that.addPlaceOfInterest(nearest);
         });
 
         console.log(nearest_points);
@@ -289,6 +291,8 @@ Map.prototype.generatePath = function(duration){
         that.map.on('zoomend', function() {
           control.route();
         });
+
+        nearestPlacesOfInterest.forEach(p => that.addPlaceOfInterest(p))
       });
 
   //console.log("placesOfInterest", that.placesOfInterest);
@@ -325,10 +329,10 @@ Map.prototype.on = function(eventType, func){
   this.handlers_[eventType].push(func)
 }
 
-Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
+/*Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
   var L = window.L;
   var map = this.map;
-
+  
   var control = L.Routing.control({
     plan: L.Routing.plan(
       [ start_latlng, dest_latlngs ], 
@@ -354,7 +358,7 @@ Map.prototype.createTempRoute = function(start_latlng, dest_latlngs){
   map.on('zoomend', function() {
     control.route();
   });
-}
+}*/
 
 
 Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
@@ -368,9 +372,14 @@ Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
     markerOptions,
   ).addTo(this.map);
   
-  if (options.onClick){
-    marker.on('click', (e) => options.onClick(e, placeOfInterest, marker))
-  }
+  marker.on('click', (e) => {
+    if (typeof options != 'undefined' && options.onClick)
+      options.onClick(e, placeOfInterest, marker)
+    ;(this.handlers_['placeOfInterestClick'] || []).forEach(func => 
+      func(e, placeOfInterest, marker)
+    )
+  })
+  
 }
 
 export default Map
