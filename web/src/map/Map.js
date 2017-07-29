@@ -23,6 +23,10 @@ Map.prototype.load = function(container){
     id: 'mapbox.streets'
   }).addTo(this.map);
 
+  window.L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(this.map);
+
 }
 
 Map.prototype.createRoute = function(container){
@@ -69,7 +73,7 @@ Map.prototype.onLocationError = function(error){
   console.error(error)
 
   // Fall back to a default location of the Old Mercury Building
-  this.map.setView([-42.88234, 147.33047], 16)
+  this.map.setView([-42.88234, 147.33047], 16);
 }
 
 Map.prototype.onLocationFound = function(e){
@@ -80,6 +84,22 @@ Map.prototype.onLocationFound = function(e){
 
   window.L.marker(location).addTo(this.map);
   window.L.circle(location, radius).addTo(this.map);
+  console.log(location);
+  var temp_dest = window.L.latLng(-42.855165, 147.297478);
+  this.createRoute(location, temp_dest);
+}
+
+Map.prototype.createRoute = function(start_latlng, dest_latlngs){
+  var L = window.L;
+  var map = this.map;
+
+  L.Routing.control({
+    waypoints: [
+        start_latlng,
+        dest_latlngs
+    ],
+    routeWhileDragging: true
+  }).addTo(map);
 }
 
 

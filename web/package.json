@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "classnames": "^2.2.5",
+    "leaflet-routing-machine": "^3.2.5",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-jss": "^7.0.2",

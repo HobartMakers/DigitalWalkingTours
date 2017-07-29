@@ -6,6 +6,7 @@ import Map from './map/Map'
 import PLACE_TYPE from './map/PLACE_TYPE'
 import SideMenu from './modules/SideMenu'
 import FloatingButton from './modules/FloatingButton'
+import 'leaflet-routing-machine';
 var Urban_Art = require('./Urban_Art.json')
 var Hobart_Facilities = require('./Hobart_Facilities.json')
 
