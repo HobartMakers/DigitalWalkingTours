@@ -175,17 +175,16 @@ class App extends Component {
   toggleSideMenu = () => this.setState({ sideMenuOpen: !this.state.sideMenuOpen });
 
   startTour = () => {
-    /*var points = map.createRoute();
+    var points = map.createRoute();
 
     points.forEach(function(element) {
       console.log(element);
       window.L.marker(element).addTo(map.map)
-    });*/
+    });
 
     this.setState({
       loading: true,
     })
-
     
     var startLoc = map.getStartLocation()
 
