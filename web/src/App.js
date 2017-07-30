@@ -110,6 +110,33 @@ const optionsMenuStyles = {
   },
 }
 
+var compass_supported = true;
+var user_heading_angle = null;
+
+function deviceOrientationListener(e){
+  console.log(e);
+  if(e.type  == "locationerror"){
+    console.log("Location is not functioning on your device.");
+    compass_supported = false;
+  }
+  if(e.alpha == null){
+    console.log("No orientation data from device.");
+    compass_supported = false;
+  } else {
+    // do something!!
+    user_heading_angle = e.gamma;
+
+  }
+}
+
+if (window.DeviceOrientationEvent) {
+  // Our browser supports DeviceOrientation
+  window.addEventListener("deviceorientation", deviceOrientationListener);
+} else {
+  compass_supported = false;
+  console.log("Sorry, your browser doesn't support Device Orientation");
+}
+
 const OptionsMenu = injectStyles(optionsMenuStyles)(
   ({classes, ...props}) => <SideMenu {...props} className={classes.optionsMenu} />)
 
@@ -278,9 +305,8 @@ class App extends Component {
       loading: true,
     })
 
-    map.generatePath(20)
+    map.generatePath(20, user_heading_angle)
     .then((routes) => {
-      
       this.setState({
         loading: false,
         inTour: true,
