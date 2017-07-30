@@ -269,7 +269,10 @@ Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesO
       });*/
 
       // Must be done last else points of interest are not clickable
-      nearestPlacesOfInterest.forEach(p => this.addPlaceOfInterest(p, {isMainPoI : true}))
+      nearestPlacesOfInterest.forEach(p => {
+        p.__isMainPoI = true // Hacky
+        this.addPlaceOfInterest(p)
+      })
   }))
   .then(routes => {
     var coordinates = routes.routes[0].coordinates
@@ -491,7 +494,7 @@ Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
   var markerOptions = { title: placeOfInterest.title }
   var iconOptions = {};
 
-  if (typeof(options) != 'undefined' && options.isMainPoI != null){
+  if (placeOfInterest.__isMainPoI){
     iconOptions.width = 45;
     iconOptions.height = 45;
   }

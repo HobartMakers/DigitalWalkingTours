@@ -217,11 +217,15 @@ class App extends Component {
   };
 
   onPlaceOfInterestClick = (e, poi, marker) => {
-    
     this.unselectMarker()
 
     // Change the icon
-    var icon = iconFactory.createLeafletIcon(poi.type, {color: 'red'})
+    var iconOptions = {color: 'red'}
+    if (poi.__isMainPoI){
+      iconOptions.width = 45;
+      iconOptions.height = 45;
+    }
+    var icon = iconFactory.createLeafletIcon(poi.type, iconOptions)
     marker.setIcon(icon)
     
     e.originalEvent.stopPropagation()
@@ -246,7 +250,12 @@ class App extends Component {
 
     this.unselectMarker()
     // Change the icon
-    var icon = iconFactory.createLeafletIcon(poi.type, {color: 'purple'})
+    var iconOptions = {color: 'purple'}
+    if (poi.__isMainPoI){
+      iconOptions.width = 45;
+      iconOptions.height = 45;
+    }
+    var icon = iconFactory.createLeafletIcon(poi.type, iconOptions)
     marker.setIcon(icon)
     
     this.setState({
@@ -264,11 +273,21 @@ class App extends Component {
   unselectMarker = () => {
     const { selectedMarker, selectedPoi, autoSelectedMarker, autoSelectedPoi } = this.state
     if (selectedMarker) {
-      var icon = iconFactory.createLeafletIcon(selectedPoi.type)
+      var iconOptions = {}
+      if (selectedPoi.__isMainPoI){
+        iconOptions.width = 45;
+        iconOptions.height = 45;
+      }
+      var icon = iconFactory.createLeafletIcon(selectedPoi.type, iconOptions)
       selectedMarker.setIcon(icon)
     }
     if (autoSelectedMarker) {
-      var icon = iconFactory.createLeafletIcon(autoSelectedPoi.type)
+      var iconOptions = {}
+      if (autoSelectedPoi.__isMainPoI){
+        iconOptions.width = 45;
+        iconOptions.height = 45;
+      }
+      var icon = iconFactory.createLeafletIcon(autoSelectedPoi.type, iconOptions)
       autoSelectedMarker.setIcon(icon)
       
     }
