@@ -360,9 +360,7 @@ class App extends Component {
       errorMessage, 
     } = this.state
     selectedPoi = selectedPoi || autoSelectedPoi || {}
-
-    console.log(errorMessage)
-
+    
     return <Motion 
       defaultStyle={{
         menuX: 50,
@@ -376,6 +374,7 @@ class App extends Component {
       }}
     >
       {value => <div className={classes.app}>
+        <Loader className={classes.loading} />
         {errorMessage ? <div className={classes.error}>
           {errorMessage}
           <div className={classes.errorCloseButton}
@@ -426,7 +425,6 @@ class App extends Component {
           open={optionsOpen}
           style={{transform: `translateX(${value.optionsMenuX}px)`}} 
         />}
-        {initializing ? <Loader className={classes.loading} /> : null}
       </div>}
     </Motion>
     
