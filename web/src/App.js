@@ -49,6 +49,8 @@ const styles = {
     position: 'relative',
     margin: '0 auto',
     top: -62,
+    backgroundColor: '#cc0000',
+    fontSize: 18
   },
   mapContainer: {
     width: '100vw',
@@ -123,7 +125,7 @@ function deviceOrientationListener(e){
     compass_supported = false;
   } else {
     // do something!!
-    user_heading_angle = e.gamma;
+    user_heading_angle = e.alpha;
 
   }
 }
@@ -148,6 +150,10 @@ class App extends Component {
     map.load(this.mapEle_)
     this.updatePlacesOfInterest()
   };
+
+  addDirectionMarkerIfNoCompass = () => {
+    console.log("")
+  }
 
   updatePlacesOfInterest = () => {
     
@@ -303,6 +309,10 @@ class App extends Component {
     this.setState({
       loading: true,
     })
+
+    if(user_heading_angle != null){
+      console.log("Detected heading: " + user_heading_angle);
+    }
 
     map.generatePath(20, user_heading_angle)
     .then((routes) => {

@@ -39,7 +39,7 @@ Map.prototype.findNearest = function(ideal_point, actual_points) {
     console.log("Finding nearest");
 
     for (var i = 0; i < actual_points.length; i++) {
-        console.log(actual_points[i]);
+       // console.log(actual_points[i]);
     }
 
     actual_points.forEach(function(point) {
@@ -254,7 +254,7 @@ Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesO
         collapsible: true,
         useZoomParameter: true,
         lineOptions: {
-          styles: [{color: '#00addf', opacity: 0.8, weight: 2}]
+          styles: [{color: '#aa0000', opacity: 0.8, weight: 2, dashArray: "10, 10"}]
         },
       });
 
@@ -269,7 +269,7 @@ Map.prototype.generatePath_ = function(startLocation, center_point, temp_placesO
       });*/
 
       // Must be done last else points of interest are not clickable
-      nearestPlacesOfInterest.forEach(p => this.addPlaceOfInterest(p))
+      nearestPlacesOfInterest.forEach(p => this.addPlaceOfInterest(p, {isMainPoI : true}))
   }))
   .then(routes => {
     var coordinates = routes.routes[0].coordinates
@@ -489,8 +489,14 @@ Map.prototype.on = function(eventType, func){
 Map.prototype.addPlaceOfInterest = function(placeOfInterest, options){
 
   var markerOptions = { title: placeOfInterest.title }
+  var iconOptions = {};
+
+  if (typeof(options) != 'undefined' && options.isMainPoI != null){
+    iconOptions.width = 45;
+    iconOptions.height = 45;
+  }
   
-  markerOptions.icon = this.iconFactory_.createLeafletIcon(placeOfInterest.type)
+  markerOptions.icon = this.iconFactory_.createLeafletIcon(placeOfInterest.type, iconOptions)
 
   var marker = L.marker(
     [placeOfInterest.lat, placeOfInterest.long],
