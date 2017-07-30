@@ -30,7 +30,6 @@ function load_facilities($filename) {
 
     foreach ($facilities['features'] as $f) {
         $feature = [];
-    
 
         $feature['title'] = $f['properties']['NAME'];
         $feature['long'] = $f['geometry']['coordinates'][0];
@@ -71,7 +70,31 @@ function load_urban_art($filename) {
         //$feature['images'] = ["https://tascode.com/govhack2017/images/urban-art-$id.jpg"];
         $feature['distance'] = distance($x, $y, $feature['lat'], $feature['long']);
 
-        //print_r($feature);
+        $features[] = $feature;
+    }
+
+    return $features;
+}
+
+function load_linc($filename) {
+
+    global $x;
+    global $y;
+    $features = [];
+    $urban_art = json_decode(file_get_contents($filename), True);
+
+    foreach ($urban_art['features'] as $f) {
+        $feature = [];
+
+        $title  = $f['properties']['title'];
+        $title = str_replace("OAC", "Online Access Centre", $title);
+        $feature['title'] = $title;
+        $feature['long'] = $f['geometry']['coordinates'][0];
+        $feature['lat'] = $f['geometry']['coordinates'][1];
+        $feature['type'] = 'linc location';
+        $feature['contents'] = "Address: " . $f['properties']['address'];
+        $feature['distance'] = distance($x, $y, $feature['lat'], $feature['long']);
+
         $features[] = $feature;
     }
 
@@ -104,8 +127,16 @@ function output_json($features) {
     header('Content-type: application/json');
 
     if (array_key_exists('HTTP_REFERER', $_SERVER)) {
+        error_log("HTTP_REFERER: ".$_SERVER['HTTP_REFERER']);
+
         $origin = rtrim($_SERVER['HTTP_REFERER'], "/");
-        header("Access-Control-Allow-Origin: $origin");
+        error_log("origin: $origin");
+
+        preg_match("|([^/]+//[^/]+)|", $_SERVER['HTTP_REFERER'], $matches);
+        $origin2 = $matches[1];
+        error_log("origin2: $origin2");
+
+        header("Access-Control-Allow-Origin: $origin2");
     }
 
     header("Access-Control-Allow-Headers: Content-Type");
@@ -114,7 +145,6 @@ function output_json($features) {
 
 //$x = -42.88234;
 //$y = 147.33047;
-//$radius = 0.1;
 
 $x = floatval($_GET['x']);
 $y = floatval($_GET['y']);
@@ -131,6 +161,9 @@ $features = array_merge($features, load_facilities('data/Clarence_Facilities.jso
 $features = array_merge($features, load_facilities('data/Kingborough_Facilities.json'));
 
 // Load Urban Art
+$features = array_merge($features, load_linc('data/Linc_Locations.json'));
+
+// Load LINC Locations
 $features = array_merge($features, load_urban_art('data/Urban_Art.json'));
 
 // Exclude those further away than $distance KM
