@@ -50,6 +50,8 @@ const styles = {
     position: 'relative',
     margin: '0 auto',
     top: -82,
+    backgroundColor: '#cc0000',
+    fontSize: 18
   },
   mapContainer: {
     width: '100vw',
