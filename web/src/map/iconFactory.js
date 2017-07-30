@@ -25,6 +25,12 @@ function IconFactory(){
 }
 
 
+// dark green #4e9a06
+// dark blue #204a07
+// 
+
+
+
 /**
  * Returns a dom element. Leaflet requires a DOM node
  */
@@ -36,23 +42,23 @@ IconFactory.prototype.createSvgIcon = function(type, iconOptions = {}){
   var { width, height } = iconOptions
 
   switch (type){
-    case PLACE_TYPE.GALLERY: var Icon = ArtGalleryIcon; var color = '734a08'; break;
-    case PLACE_TYPE.LIBRARY: var Icon = LibraryIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.MUSEUM: var Icon = MuseumIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.CINEMA: var Icon = CinemaIcon; var color = '#734a08'; break;
+    case PLACE_TYPE.GALLERY: var Icon = ArtGalleryIcon; var color = '#a40000'; break; // dark red
+    case PLACE_TYPE.LIBRARY: var Icon = LibraryIcon; var color = '#d3d7cf'; break; // light grey
+    case PLACE_TYPE.MUSEUM: var Icon = MuseumIcon; var color = '#8f5902'; break; // dark brown
+    case PLACE_TYPE.CINEMA: var Icon = CinemaIcon; var color = '#2e3436'; break; // dark grey
     case PLACE_TYPE.BURIAL_GROUND: var Icon = CemeteryIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.PARK: var Icon = ParkIcon; var color = '#c8facc'; break;
+    case PLACE_TYPE.PARK: var Icon = ParkIcon; var color = '#4e9a06'; break; // dark green
     case PLACE_TYPE.PICNIC_AREA: var Icon = PicnicSiteIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.SPORTSGROUND: var Icon = AmericanFootballIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.AMUSEMENT: var Icon = AmusementIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.CULTURAL: var Icon = TheatreIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.HISTORICAL: var Icon = MuseumIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.INDUSTRIAL: var Icon = IndustryIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.INFORMATION: var Icon = InformationIcon; var color = '#0e97d9'; break;
-    case PLACE_TYPE.NATURAL_FEATURE: var Icon = NaturalIcon; var color = '#734a08'; break;
-    case PLACE_TYPE.URBAN_ART: var Icon = MonumentIcon; var color = '#734a08'; break;
-    case 'startLocation': var Icon = MarkerIcon; width=40; height=40; color='red';break;
-    default: var Icon = MarkerIcon; var color = '#734a08';
+    case PLACE_TYPE.SPORTSGROUND: var Icon = AmericanFootballIcon; var color = '#204a87'; break; // dark blue
+    case PLACE_TYPE.AMUSEMENT: var Icon = AmusementIcon; var color = '#cc0000'; break; // bright red
+    case PLACE_TYPE.CULTURAL: var Icon = TheatreIcon; var color = '#e9b96e'; break; // light chocolate
+    case PLACE_TYPE.HISTORICAL: var Icon = MuseumIcon; var color = '#ad7fa8'; break; // pale purple
+    case PLACE_TYPE.INDUSTRIAL: var Icon = IndustryIcon; var color = '#888a85'; break; // mid grey
+    case PLACE_TYPE.INFORMATION: var Icon = InformationIcon; var color = '#729fcf'; break; // pale blue
+    case PLACE_TYPE.NATURAL_FEATURE: var Icon = NaturalIcon; var color = '#73d216'; break; // mid green
+    case PLACE_TYPE.URBAN_ART: var Icon = MonumentIcon; var color = '#fce94f'; break; // butter yellow
+    case 'startLocation': var Icon = MarkerIcon; width=40; height=40; color='#8ae234';break; // light green (i.e. go)
+    default: var Icon = MarkerIcon; var color = '#f57900'; // orange
   }
 
   // The color in options takes precedence
