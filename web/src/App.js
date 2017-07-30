@@ -366,15 +366,17 @@ class App extends Component {
         menuX: 50,
         contentX: 0,
         optionsMenuX: 80,
+        loadingOpacity: 0,
       }} 
       style={{
         menuX: spring(sideMenuOpen ? 0 : 50),
         contentX: spring(sideMenuOpen ? -25 : 0),
         optionsMenuX: spring(optionsOpen ? 0 : 80),
+        loadingOpacity: spring(initializing ? 1 : 0, {stiffness: 60, damping: 40}),
       }}
     >
       {value => <div className={classes.app}>
-        <Loader className={classes.loading} />
+        <Loader className={classes.loading} style={{opacity: value.loadingOpacity,}} />
         {errorMessage ? <div className={classes.error}>
           {errorMessage}
           <div className={classes.errorCloseButton}
