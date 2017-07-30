@@ -372,7 +372,7 @@ class App extends Component {
         menuX: spring(sideMenuOpen ? 0 : 50),
         contentX: spring(sideMenuOpen ? -25 : 0),
         optionsMenuX: spring(optionsOpen ? 0 : 80),
-        loadingOpacity: spring(initializing ? 1 : 0, {stiffness: 60, damping: 40}),
+        loadingOpacity: spring(initializing ? 1 : 0, {stiffness: 7, damping: 40}),
       }}
     >
       {value => <div className={classes.app}>
