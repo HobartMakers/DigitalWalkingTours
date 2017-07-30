@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import logo from './logo.svg'
 import injectStyles from 'react-jss'
 import Button from './modules/Button'
 import Map from './map/Map'
@@ -49,7 +48,7 @@ const styles = {
   startTourButton: {
     position: 'relative',
     margin: '0 auto',
-    top: -82,
+    top: -62,
   },
   mapContainer: {
     width: '100vw',
