@@ -39,7 +39,7 @@ Map.prototype.findNearest = function(ideal_point, actual_points) {
     console.log("Finding nearest");
 
     for (var i = 0; i < actual_points.length; i++) {
-        console.log(actual_points[i]);
+       // console.log(actual_points[i]);
     }
 
     actual_points.forEach(function(point) {
