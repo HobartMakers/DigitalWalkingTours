@@ -79,6 +79,7 @@ IconFactory.prototype.getIconAnchorPos = function(placeType){
 }
 
 IconFactory.prototype.createLeafletIcon = function(type, options = {}){
+
   var svgIcon = this.createSvgIcon(type, {
     width: 20,
     height: 20, 
