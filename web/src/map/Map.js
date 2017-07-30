@@ -328,7 +328,7 @@ function pDistance(x, y, x1, y1, x2, y2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-Map.prototype.generatePath = function(duration){
+Map.prototype.generatePath = function(duration, angle){
 
   console.log("Generating path");
 
@@ -339,7 +339,13 @@ Map.prototype.generatePath = function(duration){
 
   var startLocation = this.getStartLocation()
 
-  var center_point = this.getNextPoint(startLocation, Math.random() * 360, radius);
+  if(angle != null){
+    var center_point = this.getNextPoint(startLocation, angle, radius);
+  } else{
+    var center_point = this.getNextPoint(startLocation, Math.random() * 360, radius);
+  }
+
+  
   //var points = this.createRoute(duration);
 
   
