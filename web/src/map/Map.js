@@ -422,10 +422,10 @@ Map.prototype.checkForPointsOfInterestCollisions = function(latlng){
 
   if (!closestP) return
     
-  // If the closest point is less than 10 meters a way flag it up as close
+  // If the closest point is less than 40 meters a way flag it up as close
   var meterIsh = 0.00001 // actually 1.1 meters
 
-  if (closestDis > meterIsh * 10) return
+  if (closestDis > meterIsh * 40) return
 
   ;(this.handlers_['placeOfInterestClose'] || []).forEach(func => 
     func(closestP, closestP.__marker)
